@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.16.1 -->
+<interface>
+  <requires lib="gtk+" version="3.10"/>
+  <object class="GtkApplicationWindow" id="dynamicProgramming_win">
+    <property name="can_focus">False</property>
+    <property name="valign">end</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="gravity">center</property>
+    <child>
+      <object class="GtkFixed" id="fixed1">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_right">20</property>
+        <property name="margin_top">15</property>
+        <property name="margin_bottom">15</property>
+        <child>
+          <object class="GtkButtonBox" id="buttonbox1">
+            <property name="width_request">100</property>
+            <property name="height_request">80</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <property name="layout_style">start</property>
+            <child>
+              <object class="GtkButton" id="btn_algoritmo1">
+                <property name="label" translatable="yes">Rutas más cortas</property>
+                <property name="name">btn_rutasCortas</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes"> Algoritmo para la determinación del camino más corto dado un 
+vértice origen al resto de los vértices en un grafo con pesos
+ en cada arista.</property>
+                <property name="yalign">0.43999999761581421</property>
+                <signal name="clicked" handler="on_btn_algoritmo1_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_algoritmo2">
+                <property name="label" translatable="yes">Problema de la Mochila</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Problema de optimización combinatoria, es
+ decir, que busca la mejor solución entre un
+ conjunto finito de posibles soluciones a un
+ problema.</property>
+                <signal name="clicked" handler="btn_algoritmo2_clicked_cb" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_algoritmo3">
+                <property name="label" translatable="yes">Reemplazo de Equipos</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Reemplazo de Equipos</property>
+                <signal name="clicked" handler="btn_algoritmo3_clicked_cb" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_algoritmo4">
+                <property name="label" translatable="yes">Árboles Binarios de
+ Búsqueda Optimos</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Cumple que el subárbol izquierdo de cualquier nodo (si no está vacío) 
+contiene valores menores que el que contiene dicho nodo, y el subárbol derecho 
+(si no está vacío) contiene valores mayores.</property>
+                <signal name="clicked" handler="btn_algoritmo4_clicked_cb" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_algoritmo5">
+                <property name="label" translatable="yes">Series Deportivas</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Series Deportivas</property>
+                <property name="xalign">0.46000000834465027</property>
+                <signal name="clicked" handler="btn_algoritmo5_clicked_cb" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_algoritmo6">
+                <property name="label" translatable="yes">Multiplicación de Matrices</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes"> Operación de composición efectuada entre dos
+ matrices, o bien la multiplicación entre una
+ matriz y un escalar según unas determinadas
+ reglas.</property>
+                <signal name="clicked" handler="btn_algoritmo6_clicked_cb" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_algoritmo7">
+                <property name="label" translatable="yes">Salir del Programa</property>
+                <property name="name">btn_salir</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Salir</property>
+                <property name="xalign">0.49000000953674316</property>
+                <signal name="clicked" handler="btn_algoritmo7_clicked_cb" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">6</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="x">15</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
