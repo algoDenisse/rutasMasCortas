@@ -79,7 +79,11 @@ static void generate_D1 (GtkWidget *widget, gpointer   data){
     }
   }
   create_PTable();
+  printf("Matriz Distancias para D1\n");
+  printSolution(matriz_distancias);
   generate_Dn(matriz_distancias, numeroDeTabla);
+  printf("Matriz MOdificada para D1\n" );
+  printSolution(global_distance_mtx);
   create_new_grid(global_distance_mtx, numeroDeTabla);
   gtk_widget_set_sensitive (widget, FALSE);
 
@@ -319,8 +323,11 @@ void create_new_grid(int **global_distance_mtx, int table_number){
        }
 
        if(k!=0 && j!=0){
-          if (global_distance_mtx[k-1][j-1] == INF)
-                  strcpy(cell_value, "INF");
+          if (global_distance_mtx[j-1][k-1] == INF){
+            printf("global_distance_mtx[%d][%d] = %d \n", j-1, k-1, global_distance_mtx[j-1][k-1] );
+            strcpy(cell_value, "INF");
+          }
+
           else{
                  snprintf(cell_value,5,"%d",global_distance_mtx[j-1][k-1]);
           }
@@ -373,7 +380,7 @@ void update_PTable(){
       snprintf(pt_cell_value,5,"%d",optimal_routes_mtx[i][j]);
       gtk_entry_set_text (pt_entrada, pt_cell_value );
       if (optimal_routes_mtx[i][j] != 0) gtk_widget_set_name(pt_entrada, "new_val");
-      printf("Entrada %d, %d = optimal_routes_mtx[%d][%d] = %d \n",j+1, i+1, i, j,optimal_routes_mtx[i][j] );
+      //printf("Entrada %d, %d = optimal_routes_mtx[%d][%d] = %d \n",j+1, i+1, i, j,optimal_routes_mtx[i][j] );
     }
   }
 }
