@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #define INF 99999
 GtkWidget       *entry_grid_size;
-GtkWidget *PTable_window;
+GtkWidget *PTable_window, *combobox1, *combobox2;
 GtkWidget *table_pt;
 int n;
 int numeroDeTabla= 1;
@@ -11,6 +11,8 @@ int **global_distance_mtx;
 char **column_names;
 const char *alphabet[27]={"A","B","C","D","E","F","G","H","I","J","K","L","M","N","Ñ","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
 
+gchar pointA[20];
+gchar pointB[20];
 
 static void generate_D1 (GtkWidget *widget, gpointer   data){
 
@@ -82,7 +84,7 @@ static void generate_D1 (GtkWidget *widget, gpointer   data){
   gtk_widget_set_sensitive (widget, FALSE);
 
   free(entrance);
-//  free_memory(matriz_distancias, column_names);
+ //free_memory(matriz_distancias, column_names);
 }
 
 void guardarMatrizDistancia (GtkWidget *widget, gpointer   data){
@@ -197,11 +199,78 @@ void create_PTable(){
   gtk_widget_show_all(PTable_window);
 }
 
+void getBestRoute(int puntoA, int puntoB){
+   int stop;
+   stop = optimal_routes_mtx[puntoA-1][puntoB-1];
+   if (stop==0){
+     printf("Vaya de Punto %d  a Punto %d\n",puntoA, puntoB);
+   }
+   else{
+     printf("Vaya de Punto %d a Punto %d\n",puntoA,stop);
+      getBestRoute(puntoA,stop);
+      getBestRoute(stop,puntoB);
+   }
+}
+
+
+
+
+void getOptimalRoutes(GtkWidget *widget, gpointer   data){
+  printf("4. Dar Rutas Optimas\n");
+  printSolution(data);
+  int i, j;
+  for(i = 1; i < n ; i++){
+    for (j= 1; j<n; j++){
+      printf("\n\nRuta Optima de Punto %d ----> Punto %d: \n", i, j);
+      getBestRoute(i, j);
+    }
+  }
+    // GtkBuilder      *dialog_builder;
+    // GtkWidget       *dialog_window, *combobox1, *combobox2, *button;
+    // gchar columna[20];
+    //
+    // dialog_builder = gtk_builder_new();
+    // gtk_builder_add_from_file (dialog_builder, "glade/Dialog.glade", NULL);
+    //
+    // dialog_window = GTK_WIDGET(gtk_builder_get_object(dialog_builder, "dialog_window"));
+    // gtk_builder_connect_signals(dialog_builder,NULL);
+    //
+    // //llenar los combobox
+    // combobox1 =  GTK_WIDGET(gtk_builder_get_object(dialog_builder, "comboboxtext1"));
+    // combobox2 =  GTK_WIDGET(gtk_builder_get_object(dialog_builder, "comboboxtext2"));
+    //
+    // for (i = 0; i < n; i ++){
+    //   strcpy(columna, column_names[i]);
+    //   gtk_combo_box_text_append (combobox1,NULL, columna);
+    //   gtk_combo_box_text_append (combobox2,NULL, columna);
+    // }
+    //
+    // g_object_unref(dialog_builder);
+    //
+    // gtk_widget_show_all(dialog_window);
+
+}
+
+void on_search_routes_clicked(){
+
+  // printf("VAlor de pointA %d\n",gtk_combo_box_get_active(combobox1) );
+  // printf("VAlor de pointb %s\n",gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combobox2)) );
+  //
+  // int i,j, pos1, pos2;
+  // for(i= 0; i<n; i++){
+  //   if(strcmp(column_names[i], gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combobox1)))==0)
+  //       pos1 = i+1;
+  //   if(strcmp(column_names[i], gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combobox2)))==0)
+  //           pos2 = i+1;
+  // }
+
+}
+
 void create_new_grid(int **global_distance_mtx, int table_number){
   GtkWidget *window;
   GtkWidget *table;
-  GtkWidget       *button;
-  GtkWidget       *button_box;
+  GtkWidget *button;
+  GtkWidget *button_box;
 
   char cell_value[5];
 
@@ -255,7 +324,6 @@ void create_new_grid(int **global_distance_mtx, int table_number){
           else{
                  snprintf(cell_value,5,"%d",global_distance_mtx[j-1][k-1]);
           }
-
           gtk_entry_set_text (entrada[k][j], cell_value);
 
        }
@@ -266,20 +334,31 @@ void create_new_grid(int **global_distance_mtx, int table_number){
    button_box = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
    gtk_grid_attach (GTK_GRID (table),button_box , n/2, j, 1, 1);
 
-   strcpy(title, "Generar D(");
-   snprintf(str,5,"%d",table_number+1);
-   strcat(title, str);
-   strcat(title, ")");
+   if (table_number<n){
+     strcpy(title, "Generar D(");
+     snprintf(str,5,"%d",table_number+1);
+     strcat(title, str);
+     strcat(title, ")");
 
-   button = gtk_button_new_with_label (title);
-   g_signal_connect (button, "clicked", G_CALLBACK (guardarMatrizDistancia), (gpointer) table);
-   gtk_container_add (GTK_CONTAINER (button_box), button);
+     button = gtk_button_new_with_label (title);
+     g_signal_connect (button, "clicked", G_CALLBACK (guardarMatrizDistancia), (gpointer) table);
+     gtk_container_add (GTK_CONTAINER (button_box), button);
 
-   //funcion guardarMatrizDistancia(button, table);
-   numeroDeTabla ++;
+     //funcion guardarMatrizDistancia(button, table);
+     numeroDeTabla ++;
+   }
+   else{
+     button = gtk_button_new_with_label ("Obtener Rutas");
+     g_signal_connect (button, "clicked", G_CALLBACK (getOptimalRoutes), (gpointer) optimal_routes_mtx);
+     gtk_container_add (GTK_CONTAINER (button_box), button);
+   }
+
+
    gtk_widget_show_all(window);
 
 }
+
+
 
 void update_PTable(){
   printf("%s\n","3. Modifico el P table" );
@@ -293,6 +372,7 @@ void update_PTable(){
       pt_entrada = gtk_grid_get_child_at (table_pt, j+1, i+1);
       snprintf(pt_cell_value,5,"%d",optimal_routes_mtx[i][j]);
       gtk_entry_set_text (pt_entrada, pt_cell_value );
+      if (optimal_routes_mtx[i][j] != 0) gtk_widget_set_name(pt_entrada, "new_val");
       printf("Entrada %d, %d = optimal_routes_mtx[%d][%d] = %d \n",j+1, i+1, i, j,optimal_routes_mtx[i][j] );
     }
   }
@@ -328,7 +408,7 @@ void generate_Dn(int  **graph, int table_number){
            }
    }
 
-   printf("Ruta OPtima SSo far\n");
+   printf("Ruta OPtima So far\n");
    printSolution(optimal_routes_mtx);
 
    //copio la solucion en el global distance matrix
@@ -344,14 +424,6 @@ void update_global_mtx(int dist[][n]){
       for (j = 0; j < n; j++)
           global_distance_mtx[i][j] = dist[i][j];
 }
-
-// void update_previous_global_mtx(int  **graph){
-//   int i, j;
-//   for (i = 0; i < n; i++)
-//       for (j = 0; j < n; j++)
-//           previous_distance_mtx[i][j] = graph[i][j];
-// }
-
 
 void printSolution(int  **dist)
 {
