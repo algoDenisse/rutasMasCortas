@@ -72,7 +72,7 @@ void on_btn_algoritmo1_clicked()
 }
 
 void btn_algoritmo2_clicked_cb(){
-    system("./pending_program &");
+    system("./knapsack &");
 }
 void btn_algoritmo3_clicked_cb(){
     system("./pending_program &");

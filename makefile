@@ -2,6 +2,7 @@
 TARGET=Algoritmos
 PENDING=pending_program
 FLOYD=floyd
+KNAPSACK=knapsack
 
 # compiler
 CC=gcc
@@ -25,12 +26,14 @@ LDFLAGS=$(PTHREAD) $(GTKLIB) -export-dynamic
 OBJS= main.o
 POBJ= pending_program.o
 FOBJ= floyd.o
+KNOBJ=knapsack.o
 
 
-all: $(OBJS) $(POBJ) $(FOBJ)
+all: $(OBJS) $(POBJ) $(FOBJ) $(KNOBJ)
 	$(LD) -o $(TARGET) $(OBJS) $(LDFLAGS)
 	$(LD) -o $(PENDING) $(POBJ) $(LDFLAGS)
 	$(LD) -o $(FLOYD) $(FOBJ) $(LDFLAGS)
+	$(LD) -o $(KNAPSACK) $(KNOBJ) $(LDFLAGS)
 
 
 
@@ -45,6 +48,10 @@ pending_program.o: src/pending_program.c
 floyd.o: src/floyd.c
 
 	$(CC) -c $(CCFLAGS) src/floyd.c $(GTKLIB) -o floyd.o -w
+
+knapsack.o: src/knapsack.c
+
+	$(CC) -c $(CCFLAGS) src/knapsack.c $(GTKLIB) -o knapsack.o -w
 
 
 
