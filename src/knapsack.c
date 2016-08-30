@@ -173,12 +173,11 @@ void btn_aceptar_clicked_cb(){
       }
 
       //loops to create grid
-      for(k =0; k< 4;k++){ //columnas
-        for(j=0;j<numbOfObj+1;j++){ //filas
-
-          entrada[k][j]= gtk_entry_new();
-          gtk_grid_attach (GTK_GRID (table),entrada[k][j] , k, j, 1, 1);
-
+      for(j=0;j<numbOfObj+1;j++){ //filas
+				for(k =0; k< 4;k++){ //columnas
+          entrada[j][k]= gtk_entry_new();
+          gtk_grid_attach (GTK_GRID (table),entrada[j][k] , k, j, 1, 1);
+					printf("Puse la pos[%d][%d]\n",j,k );
 
         }
       }
@@ -187,17 +186,17 @@ void btn_aceptar_clicked_cb(){
       gtk_widget_set_sensitive (entrada[0][0], FALSE);
       gtk_widget_set_name(entrada[0][0], "column_name");
 
-      gtk_entry_set_text (entrada[1][0],"Cantidad");
-      gtk_widget_set_sensitive (entrada[1][0], FALSE);
-      gtk_widget_set_name(entrada[1][0], "column_name");
+      gtk_entry_set_text (entrada[0][1],"Cantidad");
+      gtk_widget_set_sensitive (entrada[0][1], FALSE);
+      gtk_widget_set_name(entrada[0][1], "column_name");
 
-      gtk_entry_set_text (entrada[2][0],"Costo");
-      gtk_widget_set_sensitive (entrada[2][0], FALSE);
-      gtk_widget_set_name(entrada[2][0], "column_name");
+      gtk_entry_set_text (entrada[0][2],"Costo");
+      gtk_widget_set_sensitive (entrada[0][2], FALSE);
+      gtk_widget_set_name(entrada[0][2], "column_name");
 
-      gtk_entry_set_text (entrada[3][0],"Valor");
-      gtk_widget_set_sensitive (entrada[3][0], FALSE);
-      gtk_widget_set_name(entrada[3][0], "column_name");
+      gtk_entry_set_text (entrada[0][3],"Valor");
+      gtk_widget_set_sensitive (entrada[0][3], FALSE);
+      gtk_widget_set_name(entrada[0][3], "column_name");
 
       button_box = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
       gtk_grid_attach (GTK_GRID (table),button_box ,1, j, 2, 2);
