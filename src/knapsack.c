@@ -10,6 +10,12 @@ GtkWidget       *warning_window;
 GtkFileChooser *file_chooser;
 char string_buffer[25];
 int charPos,numbOfObj;
+//char ***cell_values;
+
+GtkBuilder      *initial_table_builder;
+GtkWidget       *initial_table_window;
+GtkWidget       *initial_table;
+GtkWidget ***entrada;
 
 void buffer_char(char c){
 	string_buffer[charPos++] = c;
@@ -53,17 +59,13 @@ void calculate_knapsack_problem(GtkWidget *widget, gpointer   data){
   GtkWidget  *entrada;
   gchar* entrance;
   entrada = gtk_entry_new();
-  int i;
-
-  int j,k;
-  i=0;
+  int i,j,k;
 
     //printf("Entro al primer FOR\n" );
   for(j=1;j<numbOfObj+1;j++){
     for(k =0; k< 4;k++){
       //printf("Entro al segundo FOR\n" );
       entrada = gtk_grid_get_child_at (data, k, j);
-      //g_stpcpy(entrance,gtk_entry_get_text(entrada));
       printf("%s\n",gtk_entry_get_text(entrada));
 
   }
@@ -73,35 +75,63 @@ void calculate_knapsack_problem(GtkWidget *widget, gpointer   data){
 void kn_filechooserbutton_file_set_cb(){
   FILE *file;
   gchar *filename;
-  int in_char,nobjects;
+  int in_char;
+	int fila, columna , k, i= 0;
+
+
 
   filename=gtk_file_chooser_get_filename (file_chooser);
-  nobjects=getObjectsQuantity(filename);
-  printf("El numero de filas es:%d\n",nobjects);
+  numbOfObj=getObjectsQuantity(filename);
+  printf("El numero de filas es:%d\n",numbOfObj);
+
+	//GUardar espacios de la matriz de los datos
+	// cell_values = calloc(numbOfObj, sizeof(gchar**));
+	// for(k = 0; k < numbOfObj; k++) {
+	// 		cell_values[k] = calloc(numbOfObj, sizeof(gchar*));
+	// 		for(i = 0; i < numbOfObj; i++) {
+	// 				cell_values[k][i] = (gchar *)malloc(500);
+	// 			}
+	// }
+
+	create_entry_window();
+
+	//g_stpcpy(cell_values[0][0], "HOla aaaa");
 
   file = fopen( filename, "r" );
   if(file){
     printf("%s\n","Abri el archivo" );
     //clear_token_buffer();
+    // while ((in_char = getc(file)) != EOF){
+    //   if(in_char == '|'){
+		// 		if(columna == 4){
+		// 			fila ++;
+		// 			columna =0;
+		// 		}
+		//
+    //     printf("%s\n", string_buffer );
+		// 		printf("fila %d columna %d\n", fila, columna );
+		// 	//	g_stpcpy(cell_values[fila][columna], string_buffer);
+		// 		columna ++;
+		//
+    //     clear_token_buffer();
+    //   }
+    //   else{
+    //     buffer_char(in_char);
+		//
+    //   }
+    // }
+   }
 
-    while ((in_char = getc(file)) != EOF){
-      if(in_char == '|'){
-
-        printf("%s\n", string_buffer );
-        clear_token_buffer();
-      }
-      else{
-        buffer_char(in_char);
-
-      }
-    }
-  }
-
-  else{
+else{
     printf("%s\n","Error al abrir el archivo" );
   }
 
-
+	// printf("RESULTADO DE LA MATRIZ DE DATOS\n" );
+	// for (fila = 0; fila<numbOfObj ; fila++){
+	// 	for(columna = 0; columna< 4; columna++ ){
+	// 		printf("entrada[%d][%d] = %s\n",fila, columna, cell_values[fila][columna]);
+	// 	}
+	// }
 }
 
 void btn_warning_clicked_cb(){
@@ -132,16 +162,69 @@ void create_warning_window(gchar* pMessage){
   printf("%s\n", pMessage);
 
 }
-void btn_aceptar_clicked_cb(){
 
-  GtkBuilder      *initial_table_builder;
-  GtkWidget       *initial_table_window;
-  GtkWidget       *table;
-  GtkWidget       *button;
-  GtkWidget       *button_box;
+void create_entry_window(){
+	int k,j;
+	GtkWidget       *button;
+	GtkWidget       *button_box;
+	initial_table_builder= gtk_builder_new();
+	gtk_builder_add_from_file (initial_table_builder, "glade/initial_table_window.glade", NULL);
+
+	initial_table_window = GTK_WIDGET(gtk_builder_get_object(initial_table_builder, "initial_table_window"));
+	gtk_builder_connect_signals(initial_table_builder, NULL);
+
+	initial_table= gtk_grid_new();
+	gtk_grid_set_row_spacing (GTK_GRID (initial_table), 2);
+	gtk_container_add (GTK_CONTAINER (initial_table_window), initial_table);
+
+	//dynamic grid
+	entrada=calloc(numbOfObj+1,sizeof(GtkWidget**));
+	for(j = 0; j < numbOfObj+1; j++){
+		entrada[j]=calloc(numbOfObj+1,sizeof(GtkWidget*));
+	}
+
+	//loops to create grid
+	for(j=0;j<numbOfObj+1;j++){ //filas
+		for(k =0; k< 4;k++){ //columnas
+			entrada[j][k]= gtk_entry_new();
+			gtk_grid_attach (GTK_GRID (initial_table),entrada[j][k] , k, j, 1, 1);
+			//printf("Puse la pos[%d][%d]\n",j,k );
+
+		}
+	}
+
+	gtk_entry_set_text (entrada[0][0],"Objeto");
+	gtk_widget_set_sensitive (entrada[0][0], FALSE);
+	gtk_widget_set_name(entrada[0][0], "column_name");
+
+	gtk_entry_set_text (entrada[0][1],"Cantidad");
+	gtk_widget_set_sensitive (entrada[0][1], FALSE);
+	gtk_widget_set_name(entrada[0][1], "column_name");
+
+	gtk_entry_set_text (entrada[0][2],"Costo");
+	gtk_widget_set_sensitive (entrada[0][2], FALSE);
+	gtk_widget_set_name(entrada[0][2], "column_name");
+
+	gtk_entry_set_text (entrada[0][3],"Valor");
+	gtk_widget_set_sensitive (entrada[0][3], FALSE);
+	gtk_widget_set_name(entrada[0][3], "column_name");
+
+	button_box = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
+	gtk_grid_attach (GTK_GRID (initial_table),button_box ,1, j, 2, 2);
+
+	button = gtk_button_new_with_label ("Procesar");
+	g_signal_connect (button, "clicked", G_CALLBACK (calculate_knapsack_problem), (gpointer) initial_table);
+	gtk_container_add (GTK_CONTAINER (button_box), button);
+
+	g_object_unref(initial_table_builder);
+
+	gtk_widget_show_all(initial_table_window);
+}
+
+void btn_aceptar_clicked_cb(){
   gchar* message;
   message = calloc(1, 500*sizeof(gchar));
-  int k,j;
+
 
   object_number = gtk_entry_get_text (entry_object_number);
   knapsack_capacity=gtk_entry_get_text (entry_knapsack_capacity);
@@ -151,67 +234,9 @@ void btn_aceptar_clicked_cb(){
 
   }
   else{
-
-
-      initial_table_builder= gtk_builder_new();
-      gtk_builder_add_from_file (initial_table_builder, "glade/initial_table_window.glade", NULL);
-
-      initial_table_window = GTK_WIDGET(gtk_builder_get_object(initial_table_builder, "initial_table_window"));
-      gtk_builder_connect_signals(initial_table_builder, NULL);
-
-      table= gtk_grid_new();
-      gtk_grid_set_row_spacing (GTK_GRID (table), 2);
-      gtk_container_add (GTK_CONTAINER (initial_table_window), table);
-
-      //dynamic grid
-      GtkWidget ***entrada;
-      numbOfObj = atoi(gtk_entry_get_text (entry_object_number));
-
-      entrada=calloc(numbOfObj+1,sizeof(GtkWidget**));
-      for(j = 0; j < numbOfObj+1; j++){
-        entrada[j]=calloc(numbOfObj+1,sizeof(GtkWidget*));
-      }
-
-      //loops to create grid
-      for(j=0;j<numbOfObj+1;j++){ //filas
-				for(k =0; k< 4;k++){ //columnas
-          entrada[j][k]= gtk_entry_new();
-          gtk_grid_attach (GTK_GRID (table),entrada[j][k] , k, j, 1, 1);
-					printf("Puse la pos[%d][%d]\n",j,k );
-
-        }
-      }
-
-      gtk_entry_set_text (entrada[0][0],"Objeto");
-      gtk_widget_set_sensitive (entrada[0][0], FALSE);
-      gtk_widget_set_name(entrada[0][0], "column_name");
-
-      gtk_entry_set_text (entrada[0][1],"Cantidad");
-      gtk_widget_set_sensitive (entrada[0][1], FALSE);
-      gtk_widget_set_name(entrada[0][1], "column_name");
-
-      gtk_entry_set_text (entrada[0][2],"Costo");
-      gtk_widget_set_sensitive (entrada[0][2], FALSE);
-      gtk_widget_set_name(entrada[0][2], "column_name");
-
-      gtk_entry_set_text (entrada[0][3],"Valor");
-      gtk_widget_set_sensitive (entrada[0][3], FALSE);
-      gtk_widget_set_name(entrada[0][3], "column_name");
-
-      button_box = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
-      gtk_grid_attach (GTK_GRID (table),button_box ,1, j, 2, 2);
-
-      button = gtk_button_new_with_label ("Procesar");
-      g_signal_connect (button, "clicked", G_CALLBACK (calculate_knapsack_problem), (gpointer) table);
-      gtk_container_add (GTK_CONTAINER (button_box), button);
-
-      g_object_unref(initial_table_builder);
-
-      gtk_widget_show_all(initial_table_window);
-
+		numbOfObj = atoi(gtk_entry_get_text (entry_object_number));
+		create_entry_window();
   }
-
-
 }
 
 int main(int argc, char *argv[]){
