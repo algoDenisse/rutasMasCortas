@@ -61,6 +61,10 @@ int getObjectsQuantity( gchar *pFilename){
 
 }
 
+void create_solution_table(){
+
+}
+
 void calculate_knapsack_problem(GtkWidget *widget, gpointer   data){
   GtkWidget  *entrada;
   gchar* entrance;
@@ -102,6 +106,9 @@ void calculate_knapsack_problem(GtkWidget *widget, gpointer   data){
 			}
 		  }
 		}
+
+		//llamar funcion que hace la prueba
+		//create_solution_table();
 		printf("Prueba de nombre de objetos\n");
 		for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, global_column_names[i] );
 
@@ -243,74 +250,86 @@ void kn_filechooserbutton_file_set_cb(){
 	int fila, columna , k, i, j= 0;
   filename=gtk_file_chooser_get_filename (file_chooser);
   numbOfObj=getObjectsQuantity(filename);
-	if(numbOfObj< 3){
-		create_warning_window("La cantidad de objetos debe ser mayor a 3.");
+	knapsack_capacity= gtk_entry_get_text (entry_knapsack_capacity);
+	if((!is_number(knapsack_capacity)) || ( strcmp(gtk_entry_get_text (entry_knapsack_capacity), "") ==0)){
+		create_warning_window("Debe ingresar una capacidad de la mochila valida.");
 	}
 	else{
-		printf("El numero de filas es:%d\n",numbOfObj);
-
-		//Necesitamos dos matrices, una de datos y otra de columnas
-		column_names =  calloc(numbOfObj, 500*sizeof(gchar));
-		//alojamos la memoria para cada espacio del char
-		for (i = 0; i < numbOfObj; ++i) {
-				column_names[i] = (char *)malloc(500);
+		printf("la capacidad del knapscak es de %d\n", knapsack_capacity);
+		if(numbOfObj< 3){
+			create_warning_window("La cantidad de objetos debe ser mayor a 3.");
 		}
+		else{
+			printf("El numero de filas es:%d\n",numbOfObj);
 
-		//alojamos memoria de la matriz de datos
-		matriz_datos = calloc(numbOfObj, 1+sizeof(int*));
-		for (i = 0; i < 3; ++i) {
-				matriz_datos[i] = calloc(3,sizeof(int));
-		}
+			//Necesitamos dos matrices, una de datos y otra de columnas
+			column_names =  calloc(numbOfObj, 500*sizeof(gchar));
+			//alojamos la memoria para cada espacio del char
+			for (i = 0; i < numbOfObj; ++i) {
+					column_names[i] = (char *)malloc(500);
+			}
 
-		char **matriz_datos_iniciales = calloc(numbOfObj*4, 500*sizeof(char));
-		//alojamos la memoria para cada espacio del char
-		for (i = 0; i < numbOfObj*4; ++i) {
-				matriz_datos_iniciales[i] = (char *)malloc(500);
-		}
-		create_entry_window();
+			//alojamos memoria de la matriz de datos
+			matriz_datos = calloc(numbOfObj, 1+sizeof(int*));
+			for (i = 0; i < numbOfObj; ++i) {
+					matriz_datos[i] = calloc(numbOfObj,sizeof(int));
+			}
 
-		file = fopen( filename, "r" );
-		if(file){
-			clear_token_buffer();
-			while ((in_char = getc(file)) != EOF){
-				if((in_char == '|')|| (in_char == '\n')){
-					strcpy(matriz_datos_iniciales[k], string_buffer);
-					clear_token_buffer();
-					k++;
+			char **matriz_datos_iniciales = calloc(numbOfObj*4, 500*sizeof(char));
+			//alojamos la memoria para cada espacio del char
+			for (i = 0; i < numbOfObj*4; ++i) {
+					matriz_datos_iniciales[i] = (char *)malloc(500);
+			}
+			create_entry_window();
+
+			file = fopen( filename, "r" );
+			if(file){
+				clear_token_buffer();
+				while ((in_char = getc(file)) != EOF){
+						if((in_char == '|')|| (in_char == '\n')){
+								strcpy(matriz_datos_iniciales[k], string_buffer);
+								clear_token_buffer();
+								k++;
+						}
+						else{
+							buffer_char(in_char);
+						}
+				}
+				printf("ya voy por AQUI\n" );
+			 }
+			else{
+					printf("%s\n","Error al abrir el archivo" );
+				}
+			//VAmos a llenar las columnas
+
+
+			fila, columna,i = 0;
+			for (k = 0; k< numbOfObj*4 ; k++){
+				if(k % 4  == 0){
+					strcpy(column_names[i],matriz_datos_iniciales[k]);
+					columna = 0;
+					i++;
+					if(k !=0){
+						fila++;
+					}
 				}
 				else{
-					buffer_char(in_char);
+					//llenamos la matriz
+					printf("matriz_datos[%d][%d] = %d\n", fila, columna, atoi(matriz_datos_iniciales[k]) );
+					matriz_datos[fila][columna] = atoi(matriz_datos_iniciales[k]);
+					columna++;
 				}
 			}
-		 }
-		else{
-				printf("%s\n","Error al abrir el archivo" );
-			}
-		//VAmos a llenar las columnas
-		fila, columna,i = 0;
-		for (k = 0; k< numbOfObj*4 ; k++){
-			if(k % 4  == 0){
-				strcpy(column_names[i],matriz_datos_iniciales[k]);
-				columna = 0;
-				i++;
-				if(k !=0){
-					fila++;
-				}
-			}
-			else{
-				//llenamos la matriz
-				matriz_datos[fila][columna] = atoi(matriz_datos_iniciales[k]);
-				columna++;
-			}
+
+			// printf("Prueba de nombre de objetos\n");
+			// for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, column_names[i] );
+			//
+			// printf("Prueba datos de la matriz\n" );
+			// printSolution(matriz_datos, numbOfObj);
+		
+			update_initial_table(numbOfObj);
 		}
 
-		printf("Prueba de nombre de objetos\n");
-		for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, column_names[i] );
-
-		printf("Prueba datos de la matriz\n" );
-		printSolution(matriz_datos, numbOfObj);
-
-		update_initial_table(numbOfObj);
 	}
 
 }
