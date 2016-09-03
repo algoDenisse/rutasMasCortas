@@ -15,8 +15,10 @@ int charPos,numbOfObj;
 char **column_names;
 int **matriz_datos;
 
-char **global_column_names;
-int **global_matriz_datos;
+
+int *global_values;
+int *global_weights;
+int *global_quantity;
 
 GtkBuilder      *initial_table_builder;
 GtkWidget       *initial_table_window;
@@ -65,55 +67,122 @@ void create_solution_table(){
 
 }
 
+void solve_knapsack_problem(GtkWidget *widget, gpointer   data){
+	GtkWidget  *entrada;
+	entrada = gtk_entry_new();
+	gchar* entrance;
+	entrance = calloc(1, 500*sizeof(gchar));
+	int val[] = {60, 100, 120, 45};
+	int wt[] = {10, 20, 30,78};
+	int  W = 50;
+	int n = sizeof(val)/sizeof(val[0]);
+	printf("el misterioso %d\n", n);
+
+	global_values = (int) calloc(numbOfObj, sizeof(int));
+	global_weights = (int) calloc(numbOfObj, sizeof(int));
+	global_quantity = (int) calloc(numbOfObj, sizeof(int));
+
+	int fila, columna,value =0;
+	int i = 0;
+	int j = 0;
+	int k = 0;
+	for(columna = 1; columna <4; columna++){
+		for(fila = 1; fila <= numbOfObj; fila++){
+			entrada = gtk_grid_get_child_at (data, columna, fila);
+		//	printf("Entrada[%d][%d] = %s\n",columna, fila, gtk_entry_get_text(entrada));
+			if(columna == 1){
+				printf("Entrada[%d][%d] = %s\n",columna, fila, gtk_entry_get_text(entrada));
+				// value = atoi(gtk_entry_get_text(entrada));
+				// printf("Value = %d\n",value);
+				g_stpcpy(entrance,gtk_entry_get_text(entrada));
+				global_quantity[i]= atoi(entrance);
+				i++;
+			}
+			else if(columna == 2){
+				printf("Entrada[%d][%d] = %s\n",columna, fila, gtk_entry_get_text(entrada));
+				g_stpcpy(entrance,gtk_entry_get_text(entrada));
+				global_weights[j] = atoi(entrance);
+				j++;
+			}
+			else if(columna == 3){
+				printf("Entrada[%d][%d] = %s\n",columna, fila, gtk_entry_get_text(entrada));
+				g_stpcpy(entrance,gtk_entry_get_text(entrada));
+				global_values[k] = atoi(entrance);
+				k++;
+			}
+		}
+	}
+	//
+	// Prueba
+	printf("GLOBAL QUANTITIES\n");
+	for(i = 0; i < numbOfObj; i++) printf("%d\n",global_quantity[i]);
+	printf("GLOBAL WEIGHTS\n");
+	for(i = 0; i < numbOfObj; i++) printf("%d\n",global_weights[i]);
+	printf("GLOBAL VALUES\n");
+	for(i = 0; i < numbOfObj; i++) printf("%d\n",global_values[i]);
+}
+
+
 void calculate_knapsack_problem(GtkWidget *widget, gpointer   data){
-  GtkWidget  *entrada;
-  gchar* entrance;
-  entrada = gtk_entry_new();
-  int i,j,k, fila, columna;
+  // GtkWidget  *entrada;
+  // gchar* entrance;
+  // entrada = gtk_entry_new();
+  // int i,j,k, fila, columna;
 
-	//Necesitamos dos matrices, una de datos y otra de columnas
-	global_column_names =  calloc(numbOfObj, 500*sizeof(char));
-	//alojamos la memoria para cada espacio del char
-	for (i = 0; i < numbOfObj; ++i) {
-			global_column_names[i] = (char *)malloc(500);
-	}
+	// //Necesitamos dos matrices, una de datos y otra de columnas
+	// global_column_names =  calloc(numbOfObj, 500*sizeof(char));
+	// //alojamos la memoria para cada espacio del char
+	// for (i = 0; i < numbOfObj; ++i) {
+	// 		global_column_names[i] = (char *)malloc(500);
+	// }
+	//
+	// global_values = calloc(numbOfObj,sizeof(int));
+	// global_weights = calloc(numbOfObj,sizeof(int));
+	// global_quantity =calloc(numbOfObj,sizeof(int));
 
-	//alojamos memoria de la matriz de datos
-	global_matriz_datos = calloc(numbOfObj, 1+sizeof(int*));
-	for (i = 0; i < 3; ++i) {
-			global_matriz_datos[i] = calloc(3,sizeof(int));
-	}
+	int val[] = {60, 100, 120, 45};
+	int wt[] = {10, 20, 30,78};
+	int  W = 50;
+	int n = sizeof(val)/sizeof(val[0]);
+	printf("el misterioso %d", n);
+
+
+	// //alojamos memoria de la matriz de datos
+	// global_matriz_datos = calloc(numbOfObj, 1+sizeof(int*));
+	// for (i = 0; i < 3; ++i) {
+	// 		global_matriz_datos[i] = calloc(3,sizeof(int));
+	// }
 
   //printf("Entro al primer FOR\n" );
-	i=0;
-  for(j=1;j<numbOfObj+1;j++){
-    for(k =0; k< 4;k++){
-
-			//lleno la col 0
-			 if(k == 0){
-			  entrada = gtk_grid_get_child_at (data, k, j);
-			 	printf("Nombre del objeto : %s\n",gtk_entry_get_text(entrada));
-			 	strcpy(global_column_names[i],gtk_entry_get_text(entrada));
-			 	i++;
-			 }
-			else{
-				  entrada = gtk_grid_get_child_at (data, k, j);
-					printf("Dato[%d][%d] = %s\n",k, j, gtk_entry_get_text(entrada));
-					columna = k-1;
-					fila= j-1;
-					printf("fila %d , columna %d \n", fila, columna );
-					global_matriz_datos[fila][columna] = atoi(gtk_entry_get_text(entrada));
-			}
-		  }
-		}
-
-		//llamar funcion que hace la prueba
-		//create_solution_table();
-		printf("Prueba de nombre de objetos\n");
-		for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, global_column_names[i] );
-
-		printf("Prueba datos de la matriz\n" );
-		printSolution(global_matriz_datos, numbOfObj);
+	// i=0;
+  // for(j=1;j<numbOfObj+1;j++){
+  //   for(k =0; k< 4;k++){
+	//
+	// 		//lleno la col 0
+	// 		 if(k == 0){
+	// 		  entrada = gtk_grid_get_child_at (data, k, j);
+	// 		 	printf("Nombre del objeto : %s\n",gtk_entry_get_text(entrada));
+	// 		 	strcpy(global_column_names[i],gtk_entry_get_text(entrada));
+	// 		 	i++;
+	// 		 }
+	// 		else{
+	// 			  entrada = gtk_grid_get_child_at (data, k, j);
+	// 				printf("Dato[%d][%d] = %s\n",k, j, gtk_entry_get_text(entrada));
+	// 				columna = k-1;
+	// 				fila= j-1;
+	// 				printf("fila %d , columna %d \n", fila, columna );
+	// 				global_matriz_datos[fila][columna] = atoi(gtk_entry_get_text(entrada));
+	// 		}
+	// 	  }
+	// 	}
+	//
+	// 	//llamar funcion que hace la prueba
+	// 	//create_solution_table();
+	// 	printf("Prueba de nombre de objetos\n");
+	// 	for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, global_column_names[i] );
+	//
+	// 	printf("Prueba datos de la matriz\n" );
+	// 	printSolution(global_matriz_datos, numbOfObj);
 }
 
 
@@ -196,7 +265,7 @@ void create_entry_window(){
 	gtk_grid_attach (GTK_GRID (initial_table),button_box ,1, j, 2, 2);
 
 	button = gtk_button_new_with_label ("Procesar");
-	g_signal_connect (button, "clicked", G_CALLBACK (calculate_knapsack_problem), (gpointer) initial_table);
+	g_signal_connect (button, "clicked", G_CALLBACK (solve_knapsack_problem), (gpointer) initial_table);
 	gtk_container_add (GTK_CONTAINER (button_box), button);
 
 	g_object_unref(initial_table_builder);
@@ -326,7 +395,7 @@ void kn_filechooserbutton_file_set_cb(){
 			//
 			// printf("Prueba datos de la matriz\n" );
 			// printSolution(matriz_datos, numbOfObj);
-		
+
 			update_initial_table(numbOfObj);
 		}
 
@@ -350,6 +419,9 @@ void btn_aceptar_clicked_cb(){
   }
 	else if(atoi(object_number)<3){
 		create_warning_window("La cantidad de objetos debe ser mayor a 3.");
+	}
+	else if(strcmp(gtk_entry_get_text (entry_knapsack_capacity), "") ==0){
+		create_warning_window("Debe ingresar una capacidad de la mochila valida.");
 	}
   else{
 		numbOfObj = atoi(gtk_entry_get_text (entry_object_number));
