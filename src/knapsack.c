@@ -15,6 +15,9 @@ int charPos,numbOfObj;
 char **column_names;
 int **matriz_datos;
 
+char **global_column_names;
+int **global_matriz_datos;
+
 GtkBuilder      *initial_table_builder;
 GtkWidget       *initial_table_window;
 GtkWidget       *initial_table;
@@ -62,18 +65,48 @@ void calculate_knapsack_problem(GtkWidget *widget, gpointer   data){
   GtkWidget  *entrada;
   gchar* entrance;
   entrada = gtk_entry_new();
-  int i,j,k;
+  int i,j,k, fila, columna;
 
-    //printf("Entro al primer FOR\n" );
+	//Necesitamos dos matrices, una de datos y otra de columnas
+	global_column_names =  calloc(numbOfObj, 500*sizeof(char));
+	//alojamos la memoria para cada espacio del char
+	for (i = 0; i < numbOfObj; ++i) {
+			global_column_names[i] = (char *)malloc(500);
+	}
+
+	//alojamos memoria de la matriz de datos
+	global_matriz_datos = calloc(numbOfObj, 1+sizeof(int*));
+	for (i = 0; i < 3; ++i) {
+			global_matriz_datos[i] = calloc(3,sizeof(int));
+	}
+
+  //printf("Entro al primer FOR\n" );
+	i=0;
   for(j=1;j<numbOfObj+1;j++){
     for(k =0; k< 4;k++){
-      //printf("Entro al segundo FOR\n" );
-      entrada = gtk_grid_get_child_at (data, k, j);
-      printf("%s\n",gtk_entry_get_text(entrada));
 
-  }
-}
+			//lleno la col 0
+			 if(k == 0){
+			  entrada = gtk_grid_get_child_at (data, k, j);
+			 	printf("Nombre del objeto : %s\n",gtk_entry_get_text(entrada));
+			 	strcpy(global_column_names[i],gtk_entry_get_text(entrada));
+			 	i++;
+			 }
+			else{
+				  entrada = gtk_grid_get_child_at (data, k, j);
+					printf("Dato[%d][%d] = %s\n",k, j, gtk_entry_get_text(entrada));
+					columna = k-1;
+					fila= j-1;
+					printf("fila %d , columna %d \n", fila, columna );
+					global_matriz_datos[fila][columna] = atoi(gtk_entry_get_text(entrada));
+			}
+		  }
+		}
+		printf("Prueba de nombre de objetos\n");
+		for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, global_column_names[i] );
 
+		printf("Prueba datos de la matriz\n" );
+		printSolution(global_matriz_datos, numbOfObj);
 }
 
 
@@ -194,9 +227,6 @@ void update_initial_table(int numbOfObj){
 				pt_entrada = gtk_grid_get_child_at (initial_table, j, i+1);
 				gtk_entry_set_text (pt_entrada, column_names[i]);
 			}
-
-
-
       pt_entrada = gtk_grid_get_child_at (initial_table, j+1, i+1);
       snprintf(pt_cell_value,5,"%d",matriz_datos[i][j]);
       gtk_entry_set_text (pt_entrada, pt_cell_value );
@@ -213,70 +243,76 @@ void kn_filechooserbutton_file_set_cb(){
 	int fila, columna , k, i, j= 0;
   filename=gtk_file_chooser_get_filename (file_chooser);
   numbOfObj=getObjectsQuantity(filename);
-  printf("El numero de filas es:%d\n",numbOfObj);
-
-	//Necesitamos dos matrices, una de datos y otra de columnas
-	column_names =  calloc(numbOfObj, 500*sizeof(gchar));
-	//alojamos la memoria para cada espacio del char
-	for (i = 0; i < numbOfObj; ++i) {
-			column_names[i] = (char *)malloc(500);
+	if(numbOfObj< 3){
+		create_warning_window("La cantidad de objetos debe ser mayor a 3.");
 	}
-
-	//alojamos memoria de la matriz de datos
-	matriz_datos = calloc(numbOfObj, 1+sizeof(int*));
-	for (i = 0; i < 3; ++i) {
-			matriz_datos[i] = calloc(3,sizeof(int));
-	}
-
-	char **matriz_datos_iniciales = calloc(numbOfObj*4, 500*sizeof(char));
-	//alojamos la memoria para cada espacio del char
-	for (i = 0; i < numbOfObj*4; ++i) {
-			matriz_datos_iniciales[i] = (char *)malloc(500);
-	}
-	create_entry_window();
-
-  file = fopen( filename, "r" );
-  if(file){
-    clear_token_buffer();
-    while ((in_char = getc(file)) != EOF){
-      if((in_char == '|')|| (in_char == '\n')){
-				strcpy(matriz_datos_iniciales[k], string_buffer);
-				clear_token_buffer();
-				k++;
-			}
-      else{
-        buffer_char(in_char);
-      }
-    }
-   }
 	else{
-	    printf("%s\n","Error al abrir el archivo" );
-	  }
-	//VAmos a llenar las columnas
-	fila, columna,i = 0;
-	for (k = 0; k< numbOfObj*4 ; k++){
-		if(k % 4  == 0){
-			strcpy(column_names[i],matriz_datos_iniciales[k]);
-			columna = 0;
-			i++;
-			if(k !=0){
-				fila++;
+		printf("El numero de filas es:%d\n",numbOfObj);
+
+		//Necesitamos dos matrices, una de datos y otra de columnas
+		column_names =  calloc(numbOfObj, 500*sizeof(gchar));
+		//alojamos la memoria para cada espacio del char
+		for (i = 0; i < numbOfObj; ++i) {
+				column_names[i] = (char *)malloc(500);
+		}
+
+		//alojamos memoria de la matriz de datos
+		matriz_datos = calloc(numbOfObj, 1+sizeof(int*));
+		for (i = 0; i < 3; ++i) {
+				matriz_datos[i] = calloc(3,sizeof(int));
+		}
+
+		char **matriz_datos_iniciales = calloc(numbOfObj*4, 500*sizeof(char));
+		//alojamos la memoria para cada espacio del char
+		for (i = 0; i < numbOfObj*4; ++i) {
+				matriz_datos_iniciales[i] = (char *)malloc(500);
+		}
+		create_entry_window();
+
+		file = fopen( filename, "r" );
+		if(file){
+			clear_token_buffer();
+			while ((in_char = getc(file)) != EOF){
+				if((in_char == '|')|| (in_char == '\n')){
+					strcpy(matriz_datos_iniciales[k], string_buffer);
+					clear_token_buffer();
+					k++;
+				}
+				else{
+					buffer_char(in_char);
+				}
+			}
+		 }
+		else{
+				printf("%s\n","Error al abrir el archivo" );
+			}
+		//VAmos a llenar las columnas
+		fila, columna,i = 0;
+		for (k = 0; k< numbOfObj*4 ; k++){
+			if(k % 4  == 0){
+				strcpy(column_names[i],matriz_datos_iniciales[k]);
+				columna = 0;
+				i++;
+				if(k !=0){
+					fila++;
+				}
+			}
+			else{
+				//llenamos la matriz
+				matriz_datos[fila][columna] = atoi(matriz_datos_iniciales[k]);
+				columna++;
 			}
 		}
-		else{
-			//llenamos la matriz
-			matriz_datos[fila][columna] = atoi(matriz_datos_iniciales[k]);
-			columna++;
-		}
+
+		printf("Prueba de nombre de objetos\n");
+		for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, column_names[i] );
+
+		printf("Prueba datos de la matriz\n" );
+		printSolution(matriz_datos, numbOfObj);
+
+		update_initial_table(numbOfObj);
 	}
 
-	printf("Prueba de nombre de objetos\n");
-	for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, column_names[i] );
-
-	printf("Prueba datos de la matriz\n" );
-	printSolution(matriz_datos, numbOfObj);
-
-	update_initial_table(numbOfObj);
 }
 
 
@@ -293,6 +329,9 @@ void btn_aceptar_clicked_cb(){
     create_warning_window("Tipo de dato inválido");
 
   }
+	else if(atoi(object_number)<3){
+		create_warning_window("La cantidad de objetos debe ser mayor a 3.");
+	}
   else{
 		numbOfObj = atoi(gtk_entry_get_text (entry_object_number));
 		create_entry_window();
