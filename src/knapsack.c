@@ -1,6 +1,8 @@
 #include <gtk/gtk.h>
 #include <stdbool.h>
+#include <ctype.h>
 #define MAXINPUT 100
+#define INF 99999
 
 int object_number=0;
 int knapsack_capacity=0;
@@ -10,7 +12,8 @@ GtkWidget       *warning_window;
 GtkFileChooser *file_chooser;
 char string_buffer[25];
 int charPos,numbOfObj;
-//char ***cell_values;
+char **column_names;
+int **matriz_datos;
 
 GtkBuilder      *initial_table_builder;
 GtkWidget       *initial_table_window;
@@ -72,67 +75,7 @@ void calculate_knapsack_problem(GtkWidget *widget, gpointer   data){
 }
 
 }
-void kn_filechooserbutton_file_set_cb(){
-  FILE *file;
-  gchar *filename;
-  int in_char;
-	int fila, columna , k, i= 0;
 
-
-
-  filename=gtk_file_chooser_get_filename (file_chooser);
-  numbOfObj=getObjectsQuantity(filename);
-  printf("El numero de filas es:%d\n",numbOfObj);
-
-	//GUardar espacios de la matriz de los datos
-	// cell_values = calloc(numbOfObj, sizeof(gchar**));
-	// for(k = 0; k < numbOfObj; k++) {
-	// 		cell_values[k] = calloc(numbOfObj, sizeof(gchar*));
-	// 		for(i = 0; i < numbOfObj; i++) {
-	// 				cell_values[k][i] = (gchar *)malloc(500);
-	// 			}
-	// }
-
-	create_entry_window();
-
-	//g_stpcpy(cell_values[0][0], "HOla aaaa");
-
-  file = fopen( filename, "r" );
-  if(file){
-    printf("%s\n","Abri el archivo" );
-    //clear_token_buffer();
-    // while ((in_char = getc(file)) != EOF){
-    //   if(in_char == '|'){
-		// 		if(columna == 4){
-		// 			fila ++;
-		// 			columna =0;
-		// 		}
-		//
-    //     printf("%s\n", string_buffer );
-		// 		printf("fila %d columna %d\n", fila, columna );
-		// 	//	g_stpcpy(cell_values[fila][columna], string_buffer);
-		// 		columna ++;
-		//
-    //     clear_token_buffer();
-    //   }
-    //   else{
-    //     buffer_char(in_char);
-		//
-    //   }
-    // }
-   }
-
-else{
-    printf("%s\n","Error al abrir el archivo" );
-  }
-
-	// printf("RESULTADO DE LA MATRIZ DE DATOS\n" );
-	// for (fila = 0; fila<numbOfObj ; fila++){
-	// 	for(columna = 0; columna< 4; columna++ ){
-	// 		printf("entrada[%d][%d] = %s\n",fila, columna, cell_values[fila][columna]);
-	// 	}
-	// }
-}
 
 void btn_warning_clicked_cb(){
   gtk_widget_destroy (warning_window);
@@ -220,6 +163,123 @@ void create_entry_window(){
 
 	gtk_widget_show_all(initial_table_window);
 }
+
+void printSolution(int  **dist, int numbOfObj)
+{
+    int i,j;
+    for (i = 0; i < numbOfObj; i++)
+    {
+        for ( j = 0; j < 3; j++)
+        {
+          if (dist[i][j] == INF)
+                printf("%7s", "INF");
+            else
+                printf ("%7d", dist[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void update_initial_table(int numbOfObj){
+	printf("%s\n","1. Modifico la tabla inicial" );
+  GtkWidget  *pt_entrada;
+  pt_entrada = gtk_entry_new();
+  char pt_cell_value[25];
+  // modificar entrada de la P table
+  int i, j;
+  for(i = 0; i < numbOfObj ; i ++){
+    for (j = 0; j<4; j++){
+			//lleno la col 0
+			if(j == 0){
+				pt_entrada = gtk_grid_get_child_at (initial_table, j, i+1);
+				gtk_entry_set_text (pt_entrada, column_names[i]);
+			}
+
+
+
+      pt_entrada = gtk_grid_get_child_at (initial_table, j+1, i+1);
+      snprintf(pt_cell_value,5,"%d",matriz_datos[i][j]);
+      gtk_entry_set_text (pt_entrada, pt_cell_value );
+      //if (optimal_routes_mtx[i][j] != 0) gtk_widget_set_name(pt_entrada, "new_val");
+      //printf("Entrada %d, %d = optimal_routes_mtx[%d][%d] = %d \n",j+1, i+1, i, j,optimal_routes_mtx[i][j] );
+    }
+  }
+}
+
+void kn_filechooserbutton_file_set_cb(){
+  FILE *file;
+  gchar *filename;
+  int in_char;
+	int fila, columna , k, i, j= 0;
+  filename=gtk_file_chooser_get_filename (file_chooser);
+  numbOfObj=getObjectsQuantity(filename);
+  printf("El numero de filas es:%d\n",numbOfObj);
+
+	//Necesitamos dos matrices, una de datos y otra de columnas
+	column_names =  calloc(numbOfObj, 500*sizeof(gchar));
+	//alojamos la memoria para cada espacio del char
+	for (i = 0; i < numbOfObj; ++i) {
+			column_names[i] = (char *)malloc(500);
+	}
+
+	//alojamos memoria de la matriz de datos
+	matriz_datos = calloc(numbOfObj, 1+sizeof(int*));
+	for (i = 0; i < 3; ++i) {
+			matriz_datos[i] = calloc(3,sizeof(int));
+	}
+
+	char **matriz_datos_iniciales = calloc(numbOfObj*4, 500*sizeof(char));
+	//alojamos la memoria para cada espacio del char
+	for (i = 0; i < numbOfObj*4; ++i) {
+			matriz_datos_iniciales[i] = (char *)malloc(500);
+	}
+	create_entry_window();
+
+  file = fopen( filename, "r" );
+  if(file){
+    clear_token_buffer();
+    while ((in_char = getc(file)) != EOF){
+      if((in_char == '|')|| (in_char == '\n')){
+				strcpy(matriz_datos_iniciales[k], string_buffer);
+				clear_token_buffer();
+				k++;
+			}
+      else{
+        buffer_char(in_char);
+      }
+    }
+   }
+	else{
+	    printf("%s\n","Error al abrir el archivo" );
+	  }
+	//VAmos a llenar las columnas
+	fila, columna,i = 0;
+	for (k = 0; k< numbOfObj*4 ; k++){
+		if(k % 4  == 0){
+			strcpy(column_names[i],matriz_datos_iniciales[k]);
+			columna = 0;
+			i++;
+			if(k !=0){
+				fila++;
+			}
+		}
+		else{
+			//llenamos la matriz
+			matriz_datos[fila][columna] = atoi(matriz_datos_iniciales[k]);
+			columna++;
+		}
+	}
+
+	printf("Prueba de nombre de objetos\n");
+	for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, column_names[i] );
+
+	printf("Prueba datos de la matriz\n" );
+	printSolution(matriz_datos, numbOfObj);
+
+	update_initial_table(numbOfObj);
+}
+
+
 
 void btn_aceptar_clicked_cb(){
   gchar* message;
