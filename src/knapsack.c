@@ -66,34 +66,37 @@ int getObjectsQuantity( gchar *pFilename){
 	return row_numb;
 
 }
-void writeFile(){
-	//Archivo en el que se graba información
-	FILE * output;
-	int j;
-	char file_value[5];
-	output= fopen( "output.txt", "w+");
-
-		for(j=0;j<numbOfObj;j++){
-			fprintf(output, "%s|",column_names[j]);
-			snprintf(file_value,5,"%d",global_quantity[j]);
-			fprintf(output, "%s|",file_value);
-			clear_file_buffer(file_value);
-			snprintf(file_value,5,"%d",global_weights[j]);
-			fprintf(output, "%s|",file_value);
-			clear_file_buffer(file_value);
-			snprintf(file_value,5,"%d",global_values[j]);
-			fprintf(output, "%s",file_value);
-			fprintf(output, "\n");
-		}
-
-
-
-	fclose(output);
-
-
-}
+// void writeFile(){
+// 	//Archivo en el que se graba información
+// 	FILE * output;
+// 	int j;
+// 	char file_value[5];
+// 	output= fopen( "output.txt", "w+");
+//
+// 		for(j=0;j<numbOfObj;j++){
+//
+// 			fprintf(output, "%s|",column_names[j]);
+// 			snprintf(file_value,5,"%d",global_quantity[j]);
+// 			fprintf(output, "%s|",file_value);
+// 			clear_file_buffer(file_value);
+// 			snprintf(file_value,5,"%d",global_weights[j]);
+// 			fprintf(output, "%s|",file_value);
+// 			clear_file_buffer(file_value);
+// 			snprintf(file_value,5,"%d",global_values[j]);
+// 			fprintf(output, "%s",file_value);
+// 			fprintf(output, "\n");
+// 		}
+//
+//
+//
+// 	fclose(output);
+// 	printf("%s\n","Termine el write" );
+//
+//
+// }
 
 void create_solution_table(int pK[numbOfObj+1][nCapacity+1]){
+
 	GtkWidget *window;
 	GtkWidget *scrolledwindow;
 	GtkAdjustment *adjustmentValue;
@@ -124,9 +127,9 @@ void create_solution_table(int pK[numbOfObj+1][nCapacity+1]){
 	 char pt_cell_value[5];
 	 char cell_value[5];
 	 t=0;
-   entrada=calloc(nCapacity+1,sizeof(GtkWidget**));
+   entrada=calloc(nCapacity,2 + sizeof(GtkWidget**));
    for(j = 0; j < nCapacity+1; j++){
-     entrada[j]=calloc(nCapacity+1,sizeof(GtkWidget*));
+     entrada[j]=calloc(nCapacity,2+sizeof(GtkWidget*));
    }
 
 	 for(k =0; k< nCapacity+2;k++){
@@ -270,7 +273,8 @@ void solve_knapsack_problem(GtkWidget *widget, gpointer   data){
 	for(i = 0; i < numbOfObj; i++) printf("%d\n",global_weights[i]);
 	printf("GLOBAL VALUES\n");
 	for(i = 0; i < numbOfObj; i++) printf("%d\n",global_values[i]);
-	writeFile();
+	//writeFile();
+	printf("%s\n","y continuo" );
 	knapSack(knapsack_capacity, global_weights, global_values, numbOfObj);
 }
 
