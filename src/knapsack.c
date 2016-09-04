@@ -62,6 +62,51 @@ int getObjectsQuantity( gchar *pFilename){
 	return row_numb;
 
 }
+int max(int a, int b) { return (a > b)? a : b; }
+
+void knapSack(int W, int *wt, int *val, int n)
+{
+   int i, w,nCapacity,j,k;
+	 printf("N:%d\n",n );
+	 printf("%d\n", atoi(W));
+	 nCapacity = atoi(W);
+	 //for(i = 0; i < numbOfObj; i++) printf("%d\n",global_values[i]);
+
+   int K[n+1][nCapacity+1];
+
+
+   // Build table K[][] in bottom up manner
+   for (i = 0; i <= n; i++)
+	 {
+
+		 	//printf("%s\n","Entre al for" );
+       for (w = 0; w <= nCapacity; w++)
+       {
+           if (i==0 || w==0)
+               K[i][w] = 0;
+           else if (wt[i-1] <= w)
+                 K[i][w] = max(val[i-1] + K[i-1][w-wt[i-1]],  K[i-1][w]);
+           else
+                 K[i][w] = K[i-1][w];
+       }
+   }
+
+	 //int i,j;
+	 for (k = 0; k <= nCapacity; k++)
+	 {
+			 for ( j = 0; j < n+1; j++)
+			 {
+				 if (K[j][k] == INF)
+							 printf("%7s", "INF");
+					 else
+							 printf ("%7d", K[j][k]);
+			 }
+			 printf("\n");
+	 }
+
+
+   //return K[n][W];
+}
 
 void create_solution_table(){
 
@@ -120,70 +165,10 @@ void solve_knapsack_problem(GtkWidget *widget, gpointer   data){
 	for(i = 0; i < numbOfObj; i++) printf("%d\n",global_weights[i]);
 	printf("GLOBAL VALUES\n");
 	for(i = 0; i < numbOfObj; i++) printf("%d\n",global_values[i]);
+
+	knapSack(knapsack_capacity, global_weights, global_values, numbOfObj);
 }
 
-
-void calculate_knapsack_problem(GtkWidget *widget, gpointer   data){
-  // GtkWidget  *entrada;
-  // gchar* entrance;
-  // entrada = gtk_entry_new();
-  // int i,j,k, fila, columna;
-
-	// //Necesitamos dos matrices, una de datos y otra de columnas
-	// global_column_names =  calloc(numbOfObj, 500*sizeof(char));
-	// //alojamos la memoria para cada espacio del char
-	// for (i = 0; i < numbOfObj; ++i) {
-	// 		global_column_names[i] = (char *)malloc(500);
-	// }
-	//
-	// global_values = calloc(numbOfObj,sizeof(int));
-	// global_weights = calloc(numbOfObj,sizeof(int));
-	// global_quantity =calloc(numbOfObj,sizeof(int));
-
-	int val[] = {60, 100, 120, 45};
-	int wt[] = {10, 20, 30,78};
-	int  W = 50;
-	int n = sizeof(val)/sizeof(val[0]);
-	printf("el misterioso %d", n);
-
-
-	// //alojamos memoria de la matriz de datos
-	// global_matriz_datos = calloc(numbOfObj, 1+sizeof(int*));
-	// for (i = 0; i < 3; ++i) {
-	// 		global_matriz_datos[i] = calloc(3,sizeof(int));
-	// }
-
-  //printf("Entro al primer FOR\n" );
-	// i=0;
-  // for(j=1;j<numbOfObj+1;j++){
-  //   for(k =0; k< 4;k++){
-	//
-	// 		//lleno la col 0
-	// 		 if(k == 0){
-	// 		  entrada = gtk_grid_get_child_at (data, k, j);
-	// 		 	printf("Nombre del objeto : %s\n",gtk_entry_get_text(entrada));
-	// 		 	strcpy(global_column_names[i],gtk_entry_get_text(entrada));
-	// 		 	i++;
-	// 		 }
-	// 		else{
-	// 			  entrada = gtk_grid_get_child_at (data, k, j);
-	// 				printf("Dato[%d][%d] = %s\n",k, j, gtk_entry_get_text(entrada));
-	// 				columna = k-1;
-	// 				fila= j-1;
-	// 				printf("fila %d , columna %d \n", fila, columna );
-	// 				global_matriz_datos[fila][columna] = atoi(gtk_entry_get_text(entrada));
-	// 		}
-	// 	  }
-	// 	}
-	//
-	// 	//llamar funcion que hace la prueba
-	// 	//create_solution_table();
-	// 	printf("Prueba de nombre de objetos\n");
-	// 	for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, global_column_names[i] );
-	//
-	// 	printf("Prueba datos de la matriz\n" );
-	// 	printSolution(global_matriz_datos, numbOfObj);
-}
 
 
 void btn_warning_clicked_cb(){
@@ -319,6 +304,7 @@ void kn_filechooserbutton_file_set_cb(){
 	int fila, columna , k, i, j= 0;
   filename=gtk_file_chooser_get_filename (file_chooser);
   numbOfObj=getObjectsQuantity(filename);
+	printf("Numero de lineas%d\n", numbOfObj);
 	knapsack_capacity= gtk_entry_get_text (entry_knapsack_capacity);
 	if((!is_number(knapsack_capacity)) || ( strcmp(gtk_entry_get_text (entry_knapsack_capacity), "") ==0)){
 		create_warning_window("Debe ingresar una capacidad de la mochila valida.");
