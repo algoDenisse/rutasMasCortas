@@ -11,7 +11,7 @@ GtkWidget *entry_knapsack_capacity;
 GtkWidget       *warning_window;
 GtkFileChooser *file_chooser;
 char string_buffer[25];
-int charPos,numbOfObj;
+int charPos,numbOfObj,nCapacity;
 char **column_names;
 int **matriz_datos;
 
@@ -62,11 +62,79 @@ int getObjectsQuantity( gchar *pFilename){
 	return row_numb;
 
 }
+
+void create_solution_table(int pK[numbOfObj+1][nCapacity+1]){
+	GtkWidget *window;
+	GtkWidget *scrolledwindow;
+	GtkAdjustment *adjustmentValue;
+  GtkWidget *table;
+  GtkWidget *button;
+  GtkWidget *button_box;
+
+	/* create a new window */
+   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+   gtk_window_set_title (GTK_WINDOW (window),"Knapsack Solution");
+
+	 /*Scrolled window*/
+
+	 scrolledwindow = gtk_scrolled_window_new(NULL,NULL);
+	 gtk_widget_set_size_request(scrolledwindow, 600, 300);
+
+
+	 gtk_container_add (GTK_CONTAINER (window), scrolledwindow);
+
+	 // create new table
+   table= gtk_grid_new();
+   gtk_grid_set_row_spacing (GTK_GRID (table), 2);
+   gtk_container_add (GTK_CONTAINER (scrolledwindow), table);
+
+	 GtkWidget ***entrada;
+
+	 int j,k,i,t;
+	 char pt_cell_value[5];
+	 char cell_value[5];
+	 t=0;
+   entrada=calloc(nCapacity+1,sizeof(GtkWidget**));
+   for(j = 0; j < nCapacity+1; j++){
+     entrada[j]=calloc(nCapacity+1,sizeof(GtkWidget*));
+   }
+
+	 for(k =0; k< nCapacity+2;k++){
+     for(j=0;j<numbOfObj+1;j++){
+			 entrada[j][k]= gtk_entry_new ();
+       gtk_widget_set_sensitive (entrada[j][k], FALSE);
+       gtk_grid_attach (GTK_GRID (table),entrada[j][k] , j, k, 1, 1);
+
+			 if (k == 0 && j != 0){
+				  gtk_widget_set_name(entrada[j][k], "column_name");
+          gtk_entry_set_text (entrada[j][k],column_names[j-1]);
+       }
+			 if (j ==0 && k!=0){
+         gtk_widget_set_name(entrada[j][k], "column_name");
+				 snprintf(pt_cell_value,5,"%d",t);
+         gtk_entry_set_text(entrada[j][k],pt_cell_value);
+				 t++;
+       }
+
+			 if(k!=0&& j!=0){
+				    snprintf(cell_value,5,"%d",pK[j][k-1]);
+        		gtk_entry_set_text (entrada[j][k], cell_value);
+
+       }
+
+      }
+
+    }
+
+		gtk_widget_show_all(window);
+
+
+}
 int max(int a, int b) { return (a > b)? a : b; }
 
 void knapSack(int W, int *wt, int *val, int n)
 {
-   int i, w,nCapacity,j,k;
+   int i, w,j,k;
 	 printf("N:%d\n",n );
 	 printf("%d\n", atoi(W));
 	 nCapacity = atoi(W);
@@ -104,13 +172,12 @@ void knapSack(int W, int *wt, int *val, int n)
 			 printf("\n");
 	 }
 
+	 create_solution_table(K);
 
    //return K[n][W];
 }
 
-void create_solution_table(){
 
-}
 
 void solve_knapsack_problem(GtkWidget *widget, gpointer   data){
 	GtkWidget  *entrada;
