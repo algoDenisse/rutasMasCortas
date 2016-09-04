@@ -33,6 +33,10 @@ void clear_token_buffer(){
 	memset(string_buffer, 0, 25);
 	charPos = 0;
 }
+void clear_file_buffer(char pfile_value[5]){
+	memset(pfile_value, 0, 5);
+
+}
 
 bool is_number(gchar* pvalue){
 
@@ -60,6 +64,32 @@ int getObjectsQuantity( gchar *pFilename){
 	}
   //fclose(pFilename);
 	return row_numb;
+
+}
+void writeFile(){
+	//Archivo en el que se graba información
+	FILE * output;
+	int j;
+	char file_value[5];
+	output= fopen( "output.txt", "w+");
+
+		for(j=0;j<numbOfObj;j++){
+			fprintf(output, "%s|",column_names[j]);
+			snprintf(file_value,5,"%d",global_quantity[j]);
+			fprintf(output, "%s|",file_value);
+			clear_file_buffer(file_value);
+			snprintf(file_value,5,"%d",global_weights[j]);
+			fprintf(output, "%s|",file_value);
+			clear_file_buffer(file_value);
+			snprintf(file_value,5,"%d",global_values[j]);
+			fprintf(output, "%s",file_value);
+			fprintf(output, "\n");
+		}
+
+
+
+	fclose(output);
+
 
 }
 
@@ -190,6 +220,8 @@ void solve_knapsack_problem(GtkWidget *widget, gpointer   data){
 	int n = sizeof(val)/sizeof(val[0]);
 	printf("el misterioso %d\n", n);
 
+
+
 	global_values = (int) calloc(numbOfObj, sizeof(int));
 	global_weights = (int) calloc(numbOfObj, sizeof(int));
 	global_quantity = (int) calloc(numbOfObj, sizeof(int));
@@ -201,6 +233,7 @@ void solve_knapsack_problem(GtkWidget *widget, gpointer   data){
 	for(columna = 1; columna <4; columna++){
 		for(fila = 1; fila <= numbOfObj; fila++){
 			entrada = gtk_grid_get_child_at (data, columna, fila);
+
 		//	printf("Entrada[%d][%d] = %s\n",columna, fila, gtk_entry_get_text(entrada));
 			if(columna == 1){
 				printf("Entrada[%d][%d] = %s\n",columna, fila, gtk_entry_get_text(entrada));
@@ -209,21 +242,26 @@ void solve_knapsack_problem(GtkWidget *widget, gpointer   data){
 				g_stpcpy(entrance,gtk_entry_get_text(entrada));
 				global_quantity[i]= atoi(entrance);
 				i++;
+
 			}
 			else if(columna == 2){
 				printf("Entrada[%d][%d] = %s\n",columna, fila, gtk_entry_get_text(entrada));
 				g_stpcpy(entrance,gtk_entry_get_text(entrada));
 				global_weights[j] = atoi(entrance);
 				j++;
+
 			}
 			else if(columna == 3){
 				printf("Entrada[%d][%d] = %s\n",columna, fila, gtk_entry_get_text(entrada));
 				g_stpcpy(entrance,gtk_entry_get_text(entrada));
 				global_values[k] = atoi(entrance);
 				k++;
+
 			}
 		}
+
 	}
+
 	//
 	// Prueba
 	printf("GLOBAL QUANTITIES\n");
@@ -232,7 +270,7 @@ void solve_knapsack_problem(GtkWidget *widget, gpointer   data){
 	for(i = 0; i < numbOfObj; i++) printf("%d\n",global_weights[i]);
 	printf("GLOBAL VALUES\n");
 	for(i = 0; i < numbOfObj; i++) printf("%d\n",global_values[i]);
-
+	writeFile();
 	knapSack(knapsack_capacity, global_weights, global_values, numbOfObj);
 }
 
