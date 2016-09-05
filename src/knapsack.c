@@ -130,6 +130,7 @@ void create_solution_table(int pK[numbOfObj+1][nCapacity+1]){
 	 int j,k,i,t;
 	 char pt_cell_value[5];
 	 char cell_value[5];
+	 char cell_prev_value[5];
 	 t=0;
    entrada=calloc(nCapacity,2 + sizeof(GtkWidget**));
    for(j = 0; j < nCapacity+1; j++){
@@ -154,8 +155,8 @@ void create_solution_table(int pK[numbOfObj+1][nCapacity+1]){
        }
 
 			 if(k!=0&& j!=0){
-				    snprintf(cell_value,5,"%d",pK[j][k-1]);
-        		gtk_entry_set_text (entrada[j][k], cell_value);
+				 gtk_widget_set_name(entrada[j][k], "new_val");
+        	gtk_entry_set_text (entrada[j][k], "0");
 
        }
 
@@ -163,7 +164,47 @@ void create_solution_table(int pK[numbOfObj+1][nCapacity+1]){
 
     }
 
-		gtk_widget_show_all(window);
+// Llena con datso del resultado
+printf("voy por el segundo for\n" );
+t=0;
+	 for(k =0; k< nCapacity+2;k++){
+     for(j=0;j<numbOfObj+1;j++){
+
+			 if (k == 0 && j != 0){
+				  gtk_widget_set_name(entrada[j][k], "column_name");
+          gtk_entry_set_text (entrada[j][k],column_names[j-1]);
+       }
+			 if (j ==0 && k!=0){
+         gtk_widget_set_name(entrada[j][k], "column_name");
+				 snprintf(pt_cell_value,5,"%d",t);
+         gtk_entry_set_text(entrada[j][k],pt_cell_value);
+				 t++;
+       }
+			 if(j == 1 && k !=0){
+				 snprintf(cell_value,5,"%d",pK[j][k-1]);
+				 if(strcmp(cell_value, gtk_entry_get_text(entrada[j][k]))!= 0){
+					 gtk_widget_set_name(entrada[j][k], "changed_val");
+					 gtk_entry_set_text (entrada[j][k], cell_value);
+				 }
+
+			 }
+			 if(k!=0&& j!=0){
+				 if(j!=1){
+					 snprintf(cell_value,5,"%d",pK[j][k-1]);
+					 snprintf(cell_prev_value,5,"%d", pK[j-1][k-1]);
+					 if(strcmp(cell_value, cell_prev_value)!= 0){
+						 gtk_widget_set_name(entrada[j][k], "changed_val");
+						 gtk_entry_set_text (entrada[j][k], cell_value);
+					 }
+					 else{
+						 gtk_entry_set_text (entrada[j][k], cell_value);
+					 }
+				 }
+       }
+
+      }
+		}
+			gtk_widget_show_all(window);
 
 
 }

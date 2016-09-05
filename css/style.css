@@ -103,6 +103,12 @@ background-image: -gtk-gradient (linear,
   font-weight: bold;
 
 }
+#changed_val{
+  color: green;
+  font: Sanz 12;
+  font-weight: bold;
+
+}
 #no_change{
   color: black;
 }
