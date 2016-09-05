@@ -14,6 +14,7 @@ char string_buffer[25];
 int charPos,numbOfObj,nCapacity;
 char **column_names;
 int **matriz_datos;
+bool f_manual = FALSE;
 
 
 int *global_values;
@@ -69,9 +70,12 @@ int getObjectsQuantity( gchar *pFilename){
 void writeFile(){
 	//Archivo en el que se graba información
 	FILE * output;
-	int j;
+	int j, i;
 	char file_value[5];
 	output= fopen( "output.txt", "w+");
+
+	// printf("Prueba de nombre de objetos\n");
+	// for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, column_names[i] );
 
 		for(j=0;j<numbOfObj;j++){
 
@@ -210,18 +214,24 @@ void knapSack(int W, int *wt, int *val, int n)
    //return K[n][W];
 }
 
-
+bool manual(){
+	return f_manual == TRUE;
+}
 
 void solve_knapsack_problem(GtkWidget *widget, gpointer   data){
 	GtkWidget  *entrada;
 	entrada = gtk_entry_new();
 	gchar* entrance;
 	entrance = calloc(1, 500*sizeof(gchar));
-	int val[] = {60, 100, 120, 45};
-	int wt[] = {10, 20, 30,78};
-	int  W = 50;
-	int n = sizeof(val)/sizeof(val[0]);
-	printf("el misterioso %d\n", n);
+	int i = 0;
+	if(manual()){
+		//Necesitamos dos matrices, una de datos y otra de columnas
+		 column_names =  calloc(numbOfObj, 500*sizeof(gchar));
+		//alojamos la memoria para cada espacio del char
+		for (i = 0; i < numbOfObj; ++i) {
+					column_names[i] = (char *)malloc(500);
+		}
+	}
 
 
 
@@ -230,15 +240,20 @@ void solve_knapsack_problem(GtkWidget *widget, gpointer   data){
 	global_quantity = (int) calloc(numbOfObj, sizeof(int));
 
 	int fila, columna,value =0;
-	int i = 0;
+	i = 0;
 	int j = 0;
 	int k = 0;
-	for(columna = 1; columna <4; columna++){
+	int x = 0;
+	for(columna = 0; columna <4; columna++){
 		for(fila = 1; fila <= numbOfObj; fila++){
 			entrada = gtk_grid_get_child_at (data, columna, fila);
 
+			if(columna == 0){
+				g_stpcpy(column_names[x],gtk_entry_get_text(entrada));
+				x++;
+			}
 		//	printf("Entrada[%d][%d] = %s\n",columna, fila, gtk_entry_get_text(entrada));
-			if(columna == 1){
+			else if(columna == 1){
 				printf("Entrada[%d][%d] = %s\n",columna, fila, gtk_entry_get_text(entrada));
 				// value = atoi(gtk_entry_get_text(entrada));
 				// printf("Value = %d\n",value);
@@ -273,6 +288,9 @@ void solve_knapsack_problem(GtkWidget *widget, gpointer   data){
 	for(i = 0; i < numbOfObj; i++) printf("%d\n",global_weights[i]);
 	printf("GLOBAL VALUES\n");
 	for(i = 0; i < numbOfObj; i++) printf("%d\n",global_values[i]);
+
+	printf("Prueba de nombre de objetos\n");
+	for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, column_names[i] );
 	writeFile();
 	printf("%s\n","y continuo" );
 	knapSack(knapsack_capacity, global_weights, global_values, numbOfObj);
@@ -520,6 +538,7 @@ void btn_aceptar_clicked_cb(){
 	}
   else{
 		numbOfObj = atoi(gtk_entry_get_text (entry_object_number));
+		f_manual = TRUE;
 		create_entry_window();
   }
 }
