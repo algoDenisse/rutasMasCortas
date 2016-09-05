@@ -1,6 +1,8 @@
 #include <gtk/gtk.h>
+#include <math.h>
 #include <stdbool.h>
 #include <ctype.h>
+
 #define MAXINPUT 100
 #define INF 99999
 
@@ -209,6 +211,109 @@ t=0;
 
 }
 int max(int a, int b) { return (a > b)? a : b; }
+int min(int a, int b) { return (a < b)? a : b; }
+
+void knapSack_UnBounded(int W, int *wt, int *val, int n){
+	nCapacity = atoi(W);
+	int K[n+1][nCapacity+1];
+	int newCopies[n+1][nCapacity+1];
+	int i, w, Q, j, x, k;
+
+	int c;
+	c = 0;
+	for (i = 0; i <= n; i++)
+		{
+			for (w = 0; w <= nCapacity; w++)
+				{
+						if (i==0 || w==0) {
+								K[i][w] = 0;
+								newCopies[i][w] = 0;
+						} else if (wt[i-1] <= w) {
+							c = K[i-1][w];
+							Q = floor(w/wt[i-1]);
+							j = 1;
+							x = 0;
+							while(j <= Q) {
+								if(c < j*val[i-1] + K[i-1][w-(j*wt[i-1])]) {
+									x = j;
+								}
+								c = max(c, j*val[i-1] + K[i-1][w-(j*wt[i-1])]);
+								j++;
+							}
+							newCopies[i][w] = x;
+							//printf("->%d (%d, %d)<-", newCopies[i][w], i , w);
+							K[i][w] = c;
+						} else {
+								K[i][w] = K[i-1][w];
+								newCopies[i][w] = 0;
+						}
+				}
+			}
+			printf("------imprime el resultado de knapsack unbounded--------\n");
+			for (k = 0; k <= nCapacity; k++)
+			{
+					for ( j = 0; j < n+1; j++)
+					{
+						if (K[j][k] == INF)
+									printf("%7s", "INF");
+							else
+									printf ("%7d", K[j][k]);
+					}
+					printf("\n");
+			}
+}
+
+void knapSack_Bounded(int W, int *wt, int *val, int *qua, int n){
+	nCapacity = atoi(W);
+	int K[n+1][nCapacity+1];
+	int newCopies[n+1][nCapacity+1];
+	int i, w, Q, j, x, k;
+
+	int c;
+	c = 0;
+	for (i = 0; i <= n; i++)
+		{
+			for (w = 0; w <= nCapacity; w++)
+				{
+						if (i==0 || w==0) {
+								K[i][w] = 0;
+								newCopies[i][w] = 0;
+						} else if (wt[i-1] <= w) {
+							c = K[i-1][w];
+							Q = min(floor(w/wt[i-1]), qua[i-1]);
+							j = 1;
+							x = 0;
+							while(j <= Q) {
+								if(c < j*val[i-1] + K[i-1][w-(j*wt[i-1])]) {
+									x = j;
+								}
+								c = max(c, j*val[i-1] + K[i-1][w-(j*wt[i-1])]);
+								j++;
+							}
+							newCopies[i][w] = x;
+							printf("->%d (%d, %d)<-", newCopies[i][w], i , w);
+							K[i][w] = c;
+						} else {
+								K[i][w] = K[i-1][w];
+								newCopies[i][w] = 0;
+						}
+				}
+		}
+
+		printf("------imprime el resultado de knapsack bounded--------\n");
+		for (k = 0; k <= nCapacity; k++)
+		{
+				for ( j = 0; j < n+1; j++)
+				{
+					if (K[j][k] == INF)
+								printf("%7s", "INF");
+						else
+								printf ("%7d", K[j][k]);
+				}
+				printf("\n");
+		}
+}
+
 
 void knapSack(int W, int *wt, int *val, int n)
 {
@@ -334,7 +439,9 @@ void solve_knapsack_problem(GtkWidget *widget, gpointer   data){
 	for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, column_names[i] );
 	writeFile();
 	printf("%s\n","y continuo" );
-	knapSack(knapsack_capacity, global_weights, global_values, numbOfObj);
+	//knapSack(knapsack_capacity, global_weights, global_values, numbOfObj);
+	//knapSack_Bounded(knapsack_capacity, global_weights, global_values,global_quantity ,numbOfObj);
+	knapSack_UnBounded(knapsack_capacity, global_weights, global_values,numbOfObj);
 }
 
 
