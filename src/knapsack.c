@@ -11,6 +11,7 @@ int knapsack_capacity=0;
 GtkWidget *entry_object_number;
 GtkWidget *entry_knapsack_capacity;
 GtkWidget       *warning_window;
+GtkWidget *knapsack_solution_window;
 GtkFileChooser *file_chooser;
 char string_buffer[25];
 int charPos,numbOfObj,nCapacity;
@@ -344,6 +345,68 @@ t=0;
 int max(int a, int b) { return (a > b)? a : b; }
 int min(int a, int b) { return (a < b)? a : b; }
 
+void getResults(int pnewCopies[numbOfObj+1][nCapacity+1], int pK[numbOfObj+1][nCapacity+1]){
+	int k, j,i;
+	int resultado[numbOfObj];
+	for(i = 0; i<numbOfObj; i++) resultado[i] = 0;
+
+//	printf("%s\n","NEW COPIES al reves" );
+		for (k = nCapacity; k>=0; k-- ){
+			for(j = numbOfObj; j>=0 ; j --){
+				//printf("punto[%d][%d] = %d \n",j, k ,pnewCopies[j][k]);
+				if(pnewCopies[j][k] != 0){
+					//printf("cantidad = %d, peso = %d, peso calculado = %d\n", pnewCopies[j][k], global_weights[j-1], pnewCopies[j][k]*global_weights[j-1]);
+					//printf("tiene que llevar X%d = %d\n",j, pnewCopies[j][k] );
+					resultado[j-1] = pnewCopies[j][k];
+					k = k - pnewCopies[j][k]*global_weights[j-1];
+				}
+			}
+			printf("\n");
+		}
+
+		printf("Problema en forma matematica\n");
+		printf("Maximizar Z = ");
+		for(i =0 ; i <  numbOfObj-1; i++) printf("%dX%d +",global_values[i], i+1);
+		printf("%dX%d\n",global_values[numbOfObj-1], numbOfObj);
+
+		printf("Sujeto a: ");
+		for(i =0 ; i <  numbOfObj-1; i++) printf("%dX%d +",global_weights[i], i+1);
+		printf("%dX%d <= %d\n",global_weights[numbOfObj-1], numbOfObj, nCapacity);
+
+		printf("Z = %d\n",pK[numbOfObj][nCapacity]);
+		for(i = 0; i<numbOfObj; i++){
+			printf("X%d = %d\n",i+1,resultado[i] );
+		}
+
+		GtkBuilder      *knapsack_solution_builder;
+
+		GtkWidget       *knapsack_solution_label1;
+		GtkWidget       *knapsack_solution_label2;
+		GtkWidget       *knapsack_solution_label3;
+
+		knapsack_solution_builder = gtk_builder_new();
+		gtk_builder_add_from_file (knapsack_solution_builder, "glade/knapsack_solution_window.glade", NULL);
+
+		knapsack_solution_window = GTK_WIDGET(gtk_builder_get_object(knapsack_solution_builder, "knapsack_solution_window"));
+		gtk_builder_connect_signals(knapsack_solution_builder,NULL);
+
+		knapsack_solution_label1 = GTK_WIDGET(gtk_builder_get_object(knapsack_solution_builder, "label1"));
+		knapsack_solution_label2 = GTK_WIDGET(gtk_builder_get_object(knapsack_solution_builder, "label2"));
+		knapsack_solution_label3 = GTK_WIDGET(gtk_builder_get_object(knapsack_solution_builder, "label3"));
+
+		gtk_label_set_text (knapsack_solution_label1,"Maximizar Z = ");
+		gtk_label_set_text (knapsack_solution_label2,"Sujeto a: ");
+		gtk_label_set_text (knapsack_solution_label3,"Z = ");
+
+		g_object_unref(knapsack_solution_builder);
+
+		gtk_widget_show_all(knapsack_solution_window);
+		gtk_main();
+
+
+}
+
+
 void knapSack_UnBounded(int W, int *wt, int *val, int n){
 	nCapacity = atoi(W);
 	int K[n+1][nCapacity+1];
@@ -380,40 +443,42 @@ void knapSack_UnBounded(int W, int *wt, int *val, int n){
 						}
 				}
 			}
-			printf("------imprime el resultado de knapsack unbounded--------\n");
-			for (k = 0; k <= nCapacity; k++)
-			{
-					for ( j = 0; j < n+1; j++)
-					{
-						if (K[j][k] == INF)
-									printf("%7s", "INF");
-							else
-									printf ("%7d", K[j][k]);
-					}
-					printf("\n");
-			}
-			printf("------imprime el resultado de newCopies--------\n");
-			for (k = 0; k <= nCapacity; k++)
-			{
-					for ( j = 0; j < n+1; j++)
-					{
-						if (newCopies[j][k] == INF)
-									printf("%7s", "INF");
-							else
-									printf ("%7d", newCopies[j][k]);
-					}
-					printf("\n");
-			}
+			// printf("------imprime el resultado de knapsack unbounded--------\n");
+			// for (k = 0; k <= nCapacity; k++)
+			// {
+			// 		for ( j = 0; j < n+1; j++)
+			// 		{
+			// 			if (K[j][k] == INF)
+			// 						printf("%7s", "INF");
+			// 				else
+			// 						printf ("%7d", K[j][k]);
+			// 		}
+			// 		printf("\n");
+			// }
+			// printf("------imprime el resultado de newCopies--------\n");
+			// for (k = 0; k <= nCapacity; k++)
+			// {
+			// 		for ( j = 0; j < n+1; j++)
+			// 		{
+			// 			if (newCopies[j][k] == INF)
+			// 						printf("%7s", "INF");
+			// 				else
+			// 						printf ("%7d", newCopies[j][k]);
+			// 		}
+			// 		printf("\n");
+			// }
 			create_solution_table_bounded(K,newCopies);
+			getResults(newCopies, K);
 }
+
 
 void knapSack_Bounded(int W, int *wt, int *val, int *qua, int n){
 	nCapacity = atoi(W);
 	int K[n+1][nCapacity+1];
 	int newCopies[n+1][nCapacity+1];
-	int i, w, Q, j, x, k;
+	int TnewCopies[nCapacity+1][n+1];
+	int i, w, Q, j, x, k,d,c;
 
-	int c;
 	c = 0;
 	for (i = 0; i <= n; i++)
 		{
@@ -444,18 +509,24 @@ void knapSack_Bounded(int W, int *wt, int *val, int *qua, int n){
 				}
 		}
 
-		printf("------imprime el resultado de knapsack bounded--------\n");
-		for (k = 0; k <= nCapacity; k++)
-		{
-				for ( j = 0; j < n+1; j++)
-				{
-					if (K[j][k] == INF)
-								printf("%7s", "INF");
-						else
-								printf ("%7d", K[j][k]);
-				}
-				printf("\n");
-		}
+		// for (c = 0; c < n+1; c++) {
+    //     for( d = 0 ; d < nCapacity+1 ; d++ ) {
+    //        TnewCopies[d][c] = newCopies[c][d];
+    //     }
+  	// }
+
+		// printf("------imprime el resultado de knapsack bounded--------\n");
+		// for (k = 0; k <= nCapacity; k++)
+		// {
+		// 		for ( j = 0; j < n+1; j++)
+		// 		{
+		// 			if (K[j][k] == INF)
+		// 						printf("%7s", "INF");
+		// 				else
+		// 						printf ("%7d", K[j][k]);
+		// 		}
+		// 		printf("\n");
+		// }
 
 		printf("------imprime el resultado de newCopies--------\n");
 		for (k = 0; k <= nCapacity; k++)
@@ -469,7 +540,22 @@ void knapSack_Bounded(int W, int *wt, int *val, int *qua, int n){
 				}
 				printf("\n");
 		}
+
+		// printf("------imprime el resultado de TnewCopies--------\n");
+		//
+		// for ( j = 0; j < n+1; j++)
+		// {
+		// 		for (k = 0; k <= nCapacity; k++)
+		// 		{
+		// 			if (TnewCopies[j][k] == INF)
+		// 						printf("%7s", "INF");
+		// 				else
+		// 						printf ("%7d", TnewCopies[k][j]);
+		// 		}
+		// 		printf("\n");
+		// }
 		create_solution_table_bounded(K,newCopies);
+		getResults(newCopies, K);
 }
 
 
