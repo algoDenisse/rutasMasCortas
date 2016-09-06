@@ -355,6 +355,19 @@ void getResults(int pnewCopies[numbOfObj+1][nCapacity+1], int pK[numbOfObj+1][nC
 	int resultado[numbOfObj];
 	for(i = 0; i<numbOfObj; i++) resultado[i] = 0;
 
+	printf("------imprime el resultado de newCopies--------\n");
+	for (k = 0; k <= nCapacity; k++)
+	{
+			for ( j = 0; j < numbOfObj+1; j++)
+			{
+				if (pnewCopies[j][k] == INF)
+							printf("%7s", "INF");
+					else
+							printf ("%7d", pnewCopies[j][k]);
+			}
+			printf("\n");
+	}
+
 //	printf("%s\n","NEW COPIES al reves" );
 		for (k = nCapacity; k>=0; k-- ){
 			for(j = numbOfObj; j>=0 ; j --){
@@ -378,10 +391,10 @@ void getResults(int pnewCopies[numbOfObj+1][nCapacity+1], int pK[numbOfObj+1][nC
 	  strcpy(Maximizar, "Maximizar Z = " );
 
 		for(i =0 ; i <  numbOfObj-1; i++) {
-			snprintf(intermedio, 506, "%dX%d +", global_values[i], i+1);
+			snprintf(intermedio, 506, "%dx%d +", global_values[i], i+1);
 			strcat(Maximizar, intermedio);
 		}
-		snprintf(intermedio,506,"%dX%d\n",global_values[numbOfObj-1], numbOfObj);
+		snprintf(intermedio,506,"%dx%d\n",global_values[numbOfObj-1], numbOfObj);
 		strcat(Maximizar, intermedio);
 
 
@@ -390,10 +403,10 @@ void getResults(int pnewCopies[numbOfObj+1][nCapacity+1], int pK[numbOfObj+1][nC
 
 		strcpy(Sujeto, "Sujeto a: ");
 		for(i =0 ; i <  numbOfObj-1; i++){
-			snprintf(intermedio, 506, "%dX%d +",global_weights[i], i+1);
+			snprintf(intermedio, 506, "%dx%d +",global_weights[i], i+1);
 			strcat(Sujeto, intermedio);
 		}
-		snprintf(intermedio,506,"%dX%d <= %d\n",global_weights[numbOfObj-1], numbOfObj, nCapacity);
+		snprintf(intermedio,506,"%dx%d <= %d\n",global_weights[numbOfObj-1], numbOfObj, nCapacity);
 		strcat(Sujeto, intermedio);
 
 
@@ -401,7 +414,7 @@ void getResults(int pnewCopies[numbOfObj+1][nCapacity+1], int pK[numbOfObj+1][nC
 		snprintf(intermedio, 506,"Z = %d\n",pK[numbOfObj][nCapacity]);
 		strcpy(Solucion,intermedio);
 		for(i = 0; i<numbOfObj; i++){
-			snprintf(intermedio,506,"X%d = %d\n",i+1,resultado[i] );
+			snprintf(intermedio,506,"x%d = %d\n",i+1,resultado[i] );
 			strcat(Solucion, intermedio);
 		}
 
@@ -538,24 +551,6 @@ void knapSack_Bounded(int W, int *wt, int *val, int *qua, int n){
 				}
 		}
 
-		// for (c = 0; c < n+1; c++) {
-    //     for( d = 0 ; d < nCapacity+1 ; d++ ) {
-    //        TnewCopies[d][c] = newCopies[c][d];
-    //     }
-  	// }
-
-		// printf("------imprime el resultado de knapsack bounded--------\n");
-		// for (k = 0; k <= nCapacity; k++)
-		// {
-		// 		for ( j = 0; j < n+1; j++)
-		// 		{
-		// 			if (K[j][k] == INF)
-		// 						printf("%7s", "INF");
-		// 				else
-		// 						printf ("%7d", K[j][k]);
-		// 		}
-		// 		printf("\n");
-		// }
 
 		printf("------imprime el resultado de newCopies--------\n");
 		for (k = 0; k <= nCapacity; k++)
@@ -569,20 +564,6 @@ void knapSack_Bounded(int W, int *wt, int *val, int *qua, int n){
 				}
 				printf("\n");
 		}
-
-		// printf("------imprime el resultado de TnewCopies--------\n");
-		//
-		// for ( j = 0; j < n+1; j++)
-		// {
-		// 		for (k = 0; k <= nCapacity; k++)
-		// 		{
-		// 			if (TnewCopies[j][k] == INF)
-		// 						printf("%7s", "INF");
-		// 				else
-		// 						printf ("%7d", TnewCopies[k][j]);
-		// 		}
-		// 		printf("\n");
-		// }
 		create_solution_table_bounded(K,newCopies);
 		getResults(newCopies, K);
 }
@@ -597,7 +578,7 @@ void knapSack(int W, int *wt, int *val, int n)
 	 //for(i = 0; i < numbOfObj; i++) printf("%d\n",global_values[i]);
 
    int K[n+1][nCapacity+1];
-
+	 int newCopies[n+1][nCapacity+1];
 
    // Build table K[][] in bottom up manner
    for (i = 0; i <= n; i++)
@@ -606,12 +587,25 @@ void knapSack(int W, int *wt, int *val, int n)
 		 	//printf("%s\n","Entre al for" );
        for (w = 0; w <= nCapacity; w++)
        {
-           if (i==0 || w==0)
-               K[i][w] = 0;
-           else if (wt[i-1] <= w)
-                 K[i][w] = max(val[i-1] + K[i-1][w-wt[i-1]],  K[i-1][w]);
-           else
-                 K[i][w] = K[i-1][w];
+           if (i==0 || w==0){
+						 K[i][w] = 0;
+						 newCopies[i][w] = 0;
+					 }
+           else if (wt[i-1] <= w){
+						 if(val[i-1] + K[i-1][w-wt[i-1]] > K[i-1][w] ){
+							 K[i][w] = val[i-1] + K[i-1][w-wt[i-1]];
+							 newCopies[i][w] = 1;
+						 }
+						 else{
+							 K[i][w] = K[i-1][w];
+							 newCopies[i][w] = 0;
+						 }
+					 }
+           else{
+						 K[i][w] = K[i-1][w];
+						 newCopies[i][w] = 0;
+					 }
+
        }
    }
 
@@ -629,6 +623,7 @@ void knapSack(int W, int *wt, int *val, int n)
 	 }
 
 	 create_solution_table(K);
+	 getResults(newCopies, K);
 
    //return K[n][W];
 }
