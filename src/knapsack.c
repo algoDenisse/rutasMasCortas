@@ -8,6 +8,7 @@
 
 int object_number=0;
 int knapsack_capacity=0;
+int verify_entry =0;
 GtkWidget *entry_object_number;
 GtkWidget *entry_knapsack_capacity;
 GtkWidget       *warning_window;
@@ -691,46 +692,51 @@ void solve_knapsack_problem(GtkWidget *widget, gpointer   data){
 				// value = atoi(gtk_entry_get_text(entrada));
 				// printf("Value = %d\n",value);
 				g_stpcpy(entrance,gtk_entry_get_text(entrada));
+				verify_entry = gtk_entry_get_text(entrada);
 				printf("ENTRANCE = %s\n", entrance);
 				if(strcmp(entrance, "INF")==0){
 					global_quantity[i] = 99999;
 				}
+				else if (!is_number(verify_entry)){
+					create_warning_window("Las entradas deben ser numericas.");
+				}
 				else{
 					global_quantity[i]= atoi(entrance);
+					i++;
 				}
 
-				i++;
+
 
 			}
 			else if(columna == 2){
 				printf("Entrada[%d][%d] = %s\n",columna, fila, gtk_entry_get_text(entrada));
 				g_stpcpy(entrance,gtk_entry_get_text(entrada));
-				global_weights[j] = atoi(entrance);
-				j++;
-
+				verify_entry = gtk_entry_get_text(entrada);
+				if (!is_number(verify_entry)){
+					create_warning_window("Las entradas deben ser numericas.");
+				}
+				else{
+					global_weights[j] = atoi(entrance);
+					j++;
+				}
 			}
 			else if(columna == 3){
 				printf("Entrada[%d][%d] = %s\n",columna, fila, gtk_entry_get_text(entrada));
 				g_stpcpy(entrance,gtk_entry_get_text(entrada));
+				verify_entry = gtk_entry_get_text(entrada);
+				if (!is_number(verify_entry)){
+					create_warning_window("Las entradas deben ser numericas.");
+				}
+				else{
 				global_values[k] = atoi(entrance);
 				k++;
+				}
 
 			}
 		}
 
 	}
 
-	//
-	// Prueba
-	// printf("GLOBAL QUANTITIES\n");
-	// for(i = 0; i < numbOfObj; i++) printf("%d\n",global_quantity[i]);
-	// printf("GLOBAL WEIGHTS\n");
-	// for(i = 0; i < numbOfObj; i++) printf("%d\n",global_weights[i]);
-	// printf("GLOBAL VALUES\n");
-	// for(i = 0; i < numbOfObj; i++) printf("%d\n",global_values[i]);
-	//
-	// printf("Prueba de nombre de objetos\n");
-	// for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, column_names[i] );
 	writeFile();
 	defineKnapsackType();
 	printf("El tipo de knapSack es : %d\n", knapsack_type );
@@ -952,8 +958,12 @@ void kn_filechooserbutton_file_set_cb(){
 				else{
 					//llenamos la matriz
 					//printf("matriz_datos[%d][%d] = %d\n", fila, columna, atoi(matriz_datos_iniciales[k]) );
+					verify_entry = matriz_datos_iniciales[k];
 					if(strcmp(matriz_datos_iniciales[k], "INF")==0){
 						matriz_datos[fila][columna] = 99999;
+					}
+					else if(!is_number(verify_entry)){
+						create_warning_window("Las entradas deben ser numericas");
 					}
 					else{
 						matriz_datos[fila][columna] = atoi(matriz_datos_iniciales[k]);
