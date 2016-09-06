@@ -347,6 +347,11 @@ int min(int a, int b) { return (a < b)? a : b; }
 
 void getResults(int pnewCopies[numbOfObj+1][nCapacity+1], int pK[numbOfObj+1][nCapacity+1]){
 	int k, j,i;
+	char Maximizar[1024];
+	char Sujeto[1024];
+	char Solucion[1024];
+	char intermedio[506];
+
 	int resultado[numbOfObj];
 	for(i = 0; i<numbOfObj; i++) resultado[i] = 0;
 
@@ -364,18 +369,40 @@ void getResults(int pnewCopies[numbOfObj+1][nCapacity+1], int pK[numbOfObj+1][nC
 			printf("\n");
 		}
 
-		printf("Problema en forma matematica\n");
-		printf("Maximizar Z = ");
-		for(i =0 ; i <  numbOfObj-1; i++) printf("%dX%d +",global_values[i], i+1);
-		printf("%dX%d\n",global_values[numbOfObj-1], numbOfObj);
+	//	printf("Problema en forma matematica\n");
 
-		printf("Sujeto a: ");
-		for(i =0 ; i <  numbOfObj-1; i++) printf("%dX%d +",global_weights[i], i+1);
-		printf("%dX%d <= %d\n",global_weights[numbOfObj-1], numbOfObj, nCapacity);
+		//strcpy(Maximizar, "Maximizar Z = " );
+		//strcat(Maximizar, " X1 = ");
+		//strcat(actual_cell_value, quantity_cell);
 
-		printf("Z = %d\n",pK[numbOfObj][nCapacity]);
+	  strcpy(Maximizar, "Maximizar Z = " );
+
+		for(i =0 ; i <  numbOfObj-1; i++) {
+			snprintf(intermedio, 506, "%dX%d +", global_values[i], i+1);
+			strcat(Maximizar, intermedio);
+		}
+		snprintf(intermedio,506,"%dX%d\n",global_values[numbOfObj-1], numbOfObj);
+		strcat(Maximizar, intermedio);
+
+
+
+		//printf("%dX%d\n",global_values[numbOfObj-1], numbOfObj);
+
+		strcpy(Sujeto, "Sujeto a: ");
+		for(i =0 ; i <  numbOfObj-1; i++){
+			snprintf(intermedio, 506, "%dX%d +",global_weights[i], i+1);
+			strcat(Sujeto, intermedio);
+		}
+		snprintf(intermedio,506,"%dX%d <= %d\n",global_weights[numbOfObj-1], numbOfObj, nCapacity);
+		strcat(Sujeto, intermedio);
+
+
+
+		snprintf(intermedio, 506,"Z = %d\n",pK[numbOfObj][nCapacity]);
+		strcpy(Solucion,intermedio);
 		for(i = 0; i<numbOfObj; i++){
-			printf("X%d = %d\n",i+1,resultado[i] );
+			snprintf(intermedio,506,"X%d = %d\n",i+1,resultado[i] );
+			strcat(Solucion, intermedio);
 		}
 
 		GtkBuilder      *knapsack_solution_builder;
@@ -383,6 +410,8 @@ void getResults(int pnewCopies[numbOfObj+1][nCapacity+1], int pK[numbOfObj+1][nC
 		GtkWidget       *knapsack_solution_label1;
 		GtkWidget       *knapsack_solution_label2;
 		GtkWidget       *knapsack_solution_label3;
+
+
 
 		knapsack_solution_builder = gtk_builder_new();
 		gtk_builder_add_from_file (knapsack_solution_builder, "glade/knapsack_solution_window.glade", NULL);
@@ -394,9 +423,9 @@ void getResults(int pnewCopies[numbOfObj+1][nCapacity+1], int pK[numbOfObj+1][nC
 		knapsack_solution_label2 = GTK_WIDGET(gtk_builder_get_object(knapsack_solution_builder, "label2"));
 		knapsack_solution_label3 = GTK_WIDGET(gtk_builder_get_object(knapsack_solution_builder, "label3"));
 
-		gtk_label_set_text (knapsack_solution_label1,"Maximizar Z = ");
-		gtk_label_set_text (knapsack_solution_label2,"Sujeto a: ");
-		gtk_label_set_text (knapsack_solution_label3,"Z = ");
+		gtk_label_set_text (knapsack_solution_label1,Maximizar);
+		gtk_label_set_text (knapsack_solution_label2,Sujeto);
+		gtk_label_set_text (knapsack_solution_label3,Solucion);
 
 		g_object_unref(knapsack_solution_builder);
 

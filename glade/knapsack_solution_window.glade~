@@ -19,6 +19,7 @@
             <property name="baseline_position">bottom</property>
             <child>
               <object class="GtkLabel" id="label1">
+                <property name="name">lbl_mensaje</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">label</property>
@@ -31,6 +32,7 @@
             </child>
             <child>
               <object class="GtkLabel" id="label2">
+                <property name="name">lbl_mensaje</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">label</property>
@@ -55,7 +57,6 @@
             </child>
           </object>
           <packing>
-            <property name="x">246</property>
             <property name="y">66</property>
           </packing>
         </child>
