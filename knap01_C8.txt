@@ -1,4 +1,4 @@
 Candelero|1|5|10
-Radio1|1|3|9
+Radio|1|3|9
 Poster|1|4|5
 Anillo|1|1|15

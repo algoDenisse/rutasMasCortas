@@ -18,6 +18,8 @@ char **column_names;
 int **matriz_datos;
 bool f_manual = FALSE;
 
+int knapsack_type;
+
 
 int *global_values;
 int *global_weights;
@@ -210,6 +212,135 @@ t=0;
 
 
 }
+
+void create_solution_table_bounded(int pK[numbOfObj+1][nCapacity+1], int pnewCopies[numbOfObj+1][nCapacity+1]){
+
+	GtkWidget *window;
+	GtkWidget *scrolledwindow;
+	GtkAdjustment *adjustmentValue;
+  GtkWidget *table;
+  GtkWidget *button;
+  GtkWidget *button_box;
+
+	/* create a new window */
+   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+   gtk_window_set_title (GTK_WINDOW (window),"Knapsack Solution");
+
+	 /*Scrolled window*/
+
+	 scrolledwindow = gtk_scrolled_window_new(NULL,NULL);
+	 gtk_widget_set_size_request(scrolledwindow, 600, 300);
+
+
+	 gtk_container_add (GTK_CONTAINER (window), scrolledwindow);
+
+	 // create new table
+   table= gtk_grid_new();
+   gtk_grid_set_row_spacing (GTK_GRID (table), 2);
+   gtk_container_add (GTK_CONTAINER (scrolledwindow), table);
+
+	 GtkWidget ***entrada;
+
+	 int j,k,i,t;
+	 char pt_cell_value[5];
+	 char cell_value[5];
+	 char cell_prev_value[5];
+	 char actual_cell_value[10];
+	 char quantity_cell[5];
+	 char xn[5];
+	 t=0;
+   entrada=calloc(nCapacity,2 + sizeof(GtkWidget**));
+   for(j = 0; j < nCapacity+1; j++){
+     entrada[j]=calloc(nCapacity,2+sizeof(GtkWidget*));
+   }
+
+	 for(k =0; k< nCapacity+2;k++){
+     for(j=0;j<numbOfObj+1;j++){
+			 entrada[j][k]= gtk_entry_new ();
+       gtk_widget_set_sensitive (entrada[j][k], FALSE);
+       gtk_grid_attach (GTK_GRID (table),entrada[j][k] , j, k, 1, 1);
+
+			 if (k == 0 && j != 0){
+				  gtk_widget_set_name(entrada[j][k], "column_name");
+          gtk_entry_set_text (entrada[j][k],column_names[j-1]);
+       }
+			 if (j ==0 && k!=0){
+         gtk_widget_set_name(entrada[j][k], "column_name");
+				 snprintf(pt_cell_value,5,"%d",t);
+         gtk_entry_set_text(entrada[j][k],pt_cell_value);
+				 t++;
+       }
+
+			 if(k!=0&& j!=0){
+				 gtk_widget_set_name(entrada[j][k], "new_val");
+        	gtk_entry_set_text (entrada[j][k], "0");
+
+       }
+
+      }
+
+    }
+
+// Llena con datso del resultado
+printf("voy por el segundo for\n" );
+t=0;
+	 for(k =0; k< nCapacity+2;k++){
+     for(j=0;j<numbOfObj+1;j++){
+
+			 if (k == 0 && j != 0){
+				  gtk_widget_set_name(entrada[j][k], "column_name");
+          gtk_entry_set_text (entrada[j][k],column_names[j-1]);
+       }
+			 if (j ==0 && k!=0){
+         gtk_widget_set_name(entrada[j][k], "column_name");
+				 snprintf(pt_cell_value,5,"%d",t);
+         gtk_entry_set_text(entrada[j][k],pt_cell_value);
+				 t++;
+       }
+			 if(j == 1 && k !=0){
+				 snprintf(cell_value,5,"%d",pK[j][k-1]);
+				 snprintf(quantity_cell,5,"%d",pnewCopies[j][k-1]);
+				 if(strcmp(cell_value, gtk_entry_get_text(entrada[j][k]))!= 0){
+					 strcpy(actual_cell_value, cell_value);
+					 strcat(actual_cell_value, " X1 = ");
+					 strcat(actual_cell_value, quantity_cell);
+
+					 gtk_widget_set_name(entrada[j][k], "changed_val");
+					 gtk_entry_set_text (entrada[j][k], actual_cell_value);
+				 }
+
+			 }
+			 if(k!=0&& j!=0){
+				 if(j!=1){
+					 snprintf(cell_value,5,"%d",pK[j][k-1]);
+					 snprintf(cell_prev_value,5,"%d", pK[j-1][k-1]);
+					 snprintf(quantity_cell,5,"%d",pnewCopies[j][k-1]);
+					 snprintf(xn,5,"%d",j);
+					 strcpy(actual_cell_value, cell_value);
+					 strcat(actual_cell_value, " X");
+					 strcat(actual_cell_value, xn);
+					 strcat(actual_cell_value, " = ");
+					 strcat(actual_cell_value, quantity_cell);
+					 if(strcmp(cell_value, cell_prev_value)!= 0){
+						 gtk_widget_set_name(entrada[j][k], "changed_val");
+						 gtk_entry_set_text (entrada[j][k], actual_cell_value);
+					 }
+					 else{
+						 if(atoi(cell_prev_value)!= 0){
+							 gtk_entry_set_text (entrada[j][k], actual_cell_value);
+						 }
+
+					 }
+				 }
+       }
+
+      }
+		}
+			gtk_widget_show_all(window);
+
+
+}
+
 int max(int a, int b) { return (a > b)? a : b; }
 int min(int a, int b) { return (a < b)? a : b; }
 
@@ -261,6 +392,19 @@ void knapSack_UnBounded(int W, int *wt, int *val, int n){
 					}
 					printf("\n");
 			}
+			printf("------imprime el resultado de newCopies--------\n");
+			for (k = 0; k <= nCapacity; k++)
+			{
+					for ( j = 0; j < n+1; j++)
+					{
+						if (newCopies[j][k] == INF)
+									printf("%7s", "INF");
+							else
+									printf ("%7d", newCopies[j][k]);
+					}
+					printf("\n");
+			}
+			create_solution_table_bounded(K,newCopies);
 }
 
 void knapSack_Bounded(int W, int *wt, int *val, int *qua, int n){
@@ -312,6 +456,20 @@ void knapSack_Bounded(int W, int *wt, int *val, int *qua, int n){
 				}
 				printf("\n");
 		}
+
+		printf("------imprime el resultado de newCopies--------\n");
+		for (k = 0; k <= nCapacity; k++)
+		{
+				for ( j = 0; j < n+1; j++)
+				{
+					if (newCopies[j][k] == INF)
+								printf("%7s", "INF");
+						else
+								printf ("%7d", newCopies[j][k]);
+				}
+				printf("\n");
+		}
+		create_solution_table_bounded(K,newCopies);
 }
 
 
@@ -364,6 +522,25 @@ bool manual(){
 	return f_manual == TRUE;
 }
 
+void defineKnapsackType(){
+	int i;
+	for(i = 0; i < numbOfObj; i++) {
+		if(global_quantity[i] == INF){
+			knapsack_type = 1; //unbounded knapSack
+			break;
+		}
+		else if(global_quantity[i] != 1){
+			knapsack_type = 2; // bounded knapSack
+			break;
+		}
+		else{
+			knapsack_type = 3; //knapSack 01
+		}
+	}
+}
+
+
+
 void solve_knapsack_problem(GtkWidget *widget, gpointer   data){
 	GtkWidget  *entrada;
 	entrada = gtk_entry_new();
@@ -404,7 +581,14 @@ void solve_knapsack_problem(GtkWidget *widget, gpointer   data){
 				// value = atoi(gtk_entry_get_text(entrada));
 				// printf("Value = %d\n",value);
 				g_stpcpy(entrance,gtk_entry_get_text(entrada));
-				global_quantity[i]= atoi(entrance);
+				printf("ENTRANCE = %s\n", entrance);
+				if(strcmp(entrance, "INF")==0){
+					global_quantity[i] = 99999;
+				}
+				else{
+					global_quantity[i]= atoi(entrance);
+				}
+
 				i++;
 
 			}
@@ -428,20 +612,27 @@ void solve_knapsack_problem(GtkWidget *widget, gpointer   data){
 
 	//
 	// Prueba
-	printf("GLOBAL QUANTITIES\n");
-	for(i = 0; i < numbOfObj; i++) printf("%d\n",global_quantity[i]);
-	printf("GLOBAL WEIGHTS\n");
-	for(i = 0; i < numbOfObj; i++) printf("%d\n",global_weights[i]);
-	printf("GLOBAL VALUES\n");
-	for(i = 0; i < numbOfObj; i++) printf("%d\n",global_values[i]);
-
-	printf("Prueba de nombre de objetos\n");
-	for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, column_names[i] );
+	// printf("GLOBAL QUANTITIES\n");
+	// for(i = 0; i < numbOfObj; i++) printf("%d\n",global_quantity[i]);
+	// printf("GLOBAL WEIGHTS\n");
+	// for(i = 0; i < numbOfObj; i++) printf("%d\n",global_weights[i]);
+	// printf("GLOBAL VALUES\n");
+	// for(i = 0; i < numbOfObj; i++) printf("%d\n",global_values[i]);
+	//
+	// printf("Prueba de nombre de objetos\n");
+	// for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, column_names[i] );
 	writeFile();
-	printf("%s\n","y continuo" );
-	//knapSack(knapsack_capacity, global_weights, global_values, numbOfObj);
-	//knapSack_Bounded(knapsack_capacity, global_weights, global_values,global_quantity ,numbOfObj);
-	knapSack_UnBounded(knapsack_capacity, global_weights, global_values,numbOfObj);
+	defineKnapsackType();
+	printf("El tipo de knapSack es : %d\n", knapsack_type );
+	if(knapsack_type == 1){
+		knapSack_UnBounded(knapsack_capacity, global_weights, global_values,numbOfObj);
+	}
+	else if(knapsack_type == 2){
+		knapSack_Bounded(knapsack_capacity, global_weights, global_values,global_quantity ,numbOfObj);
+	}
+	else{
+		knapSack(knapsack_capacity, global_weights, global_values, numbOfObj);
+	}
 }
 
 
@@ -565,7 +756,12 @@ void update_initial_table(int numbOfObj){
 			}
       pt_entrada = gtk_grid_get_child_at (initial_table, j+1, i+1);
       snprintf(pt_cell_value,5,"%d",matriz_datos[i][j]);
-      gtk_entry_set_text (pt_entrada, pt_cell_value );
+			if(matriz_datos[i][j] == INF){
+				gtk_entry_set_text (pt_entrada, "INF");
+			}
+			else{
+				gtk_entry_set_text (pt_entrada, pt_cell_value );
+			}
       //if (optimal_routes_mtx[i][j] != 0) gtk_widget_set_name(pt_entrada, "new_val");
       //printf("Entrada %d, %d = optimal_routes_mtx[%d][%d] = %d \n",j+1, i+1, i, j,optimal_routes_mtx[i][j] );
     }
@@ -645,8 +841,13 @@ void kn_filechooserbutton_file_set_cb(){
 				}
 				else{
 					//llenamos la matriz
-					printf("matriz_datos[%d][%d] = %d\n", fila, columna, atoi(matriz_datos_iniciales[k]) );
-					matriz_datos[fila][columna] = atoi(matriz_datos_iniciales[k]);
+					//printf("matriz_datos[%d][%d] = %d\n", fila, columna, atoi(matriz_datos_iniciales[k]) );
+					if(strcmp(matriz_datos_iniciales[k], "INF")==0){
+						matriz_datos[fila][columna] = 99999;
+					}
+					else{
+						matriz_datos[fila][columna] = atoi(matriz_datos_iniciales[k]);
+					}
 					columna++;
 				}
 			}
@@ -654,8 +855,8 @@ void kn_filechooserbutton_file_set_cb(){
 			// printf("Prueba de nombre de objetos\n");
 			// for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, column_names[i] );
 			//
-			// printf("Prueba datos de la matriz\n" );
-			// printSolution(matriz_datos, numbOfObj);
+			printf("Prueba datos de la matriz\n" );
+			printSolution(matriz_datos, numbOfObj);
 
 			update_initial_table(numbOfObj);
 		}
