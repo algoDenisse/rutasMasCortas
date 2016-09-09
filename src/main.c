@@ -75,7 +75,7 @@ void btn_algoritmo2_clicked_cb(){
     system("./knapsack &");
 }
 void btn_algoritmo3_clicked_cb(){
-    system("./pending_program &");
+    system("./equipment_replace &");
 }
 void btn_algoritmo4_clicked_cb(){
     system("./pending_program &");

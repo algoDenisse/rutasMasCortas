@@ -3,6 +3,7 @@ TARGET=Algoritmos
 PENDING=pending_program
 FLOYD=floyd
 KNAPSACK=knapsack
+EQREPLACE=equipment_replace
 
 # compiler
 CC=gcc
@@ -27,13 +28,15 @@ OBJS= main.o
 POBJ= pending_program.o
 FOBJ= floyd.o
 KNOBJ=knapsack.o
+EROBJ=equipment_replace.o
 
 
-all: $(OBJS) $(POBJ) $(FOBJ) $(KNOBJ)
+all: $(OBJS) $(POBJ) $(FOBJ) $(KNOBJ) $(EROBJ)
 	$(LD) -o $(TARGET) $(OBJS) $(LDFLAGS)
 	$(LD) -o $(PENDING) $(POBJ) $(LDFLAGS)
 	$(LD) -o $(FLOYD) $(FOBJ) $(LDFLAGS)
 	$(LD) -o $(KNAPSACK) $(KNOBJ) $(LDFLAGS)
+	$(LD) -o $(EQREPLACE) $(EROBJ) $(LDFLAGS)
 
 
 
@@ -52,6 +55,10 @@ floyd.o: src/floyd.c
 knapsack.o: src/knapsack.c
 
 	$(CC) -c $(CCFLAGS) src/knapsack.c $(GTKLIB) -o knapsack.o -w
+
+equipment_replace.o: src/equipment_replace.c
+
+	$(CC) -c $(CCFLAGS) src/equipment_replace.c $(GTKLIB) -o equipment_replace.o -w
 
 
 
