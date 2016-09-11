@@ -14,6 +14,10 @@
             <property name="height_request">80</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="margin_left">9</property>
+            <property name="margin_right">14</property>
+            <property name="margin_top">9</property>
+            <property name="margin_bottom">9</property>
             <child>
               <object class="GtkLabel" id="lbl_initial_price">
                 <property name="name">lbl_mensaje</property>
@@ -98,6 +102,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <signal name="clicked" handler="btn_ok_clicked_cb" swapped="no"/>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -126,8 +131,8 @@
             </child>
           </object>
           <packing>
-            <property name="x">2</property>
-            <property name="y">3</property>
+            <property name="x">8</property>
+            <property name="y">9</property>
           </packing>
         </child>
       </object>
