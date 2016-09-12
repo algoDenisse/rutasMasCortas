@@ -8,11 +8,15 @@
 GtkWidget *entry_initial_price;
 GtkWidget *entry_useful_life;
 GtkWidget *entry_project_term;
+
+GtkBuilder      *file_saver_builder;
+GtkWidget       *file_saver_window;
 GtkFileChooser *file_chooser;
 int verify_entry,charPos,initial_price,useful_life,project_term = 0;
 bool f_manual = FALSE;
 char intermediate_buffer[5];
 char string_buffer[25];
+char file_name_buffer[25];
 int **matriz_datos;
 GtkWidget       *warning_window;
 GtkBuilder      *initial_equipment_table_builder;
@@ -90,6 +94,63 @@ bool is_number(gchar* pvalue){
 
 }
 
+
+void on_btn_save_filename_clicked(GtkWidget *widget, gpointer   data){
+  printf("voya a guaradr\n" );
+  strcpy(file_name_buffer, gtk_entry_get_text (data));
+  strcat(file_name_buffer, ".txt");
+  printf("El nombre del archivo es: %s\n", file_name_buffer );
+  //Archivo en el que se graba información
+  FILE * output;
+  int j, i;
+  char file_value[5];
+  output= fopen( file_name_buffer, "w+");
+
+  // printf("Prueba de nombre de objetos\n");
+  // for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, column_names[i] );
+
+  	// for(j=0;j<numbOfObj;j++){
+    //
+  	// 	fprintf(output, "%s|",column_names[j]);
+  	// 	snprintf(file_value,5,"%d",global_quantity[j]);
+  	// 	fprintf(output, "%s|",file_value);
+  	// 	clear_file_buffer(file_value);
+  	// 	snprintf(file_value,5,"%d",global_weights[j]);
+  	// 	fprintf(output, "%s|",file_value);
+  	// 	clear_file_buffer(file_value);
+  	// 	snprintf(file_value,5,"%d",global_values[j]);
+  	// 	fprintf(output, "%s",file_value);
+  	// 	fprintf(output, "\n");
+  	// }
+
+
+
+  fclose(output);
+}
+
+void writeFile(){
+
+  GtkWidget *button;
+  GtkWidget *entry;
+
+  file_saver_builder = gtk_builder_new();
+  gtk_builder_add_from_file (file_saver_builder, "glade/file_saver_window.glade", NULL);
+
+  file_saver_window = GTK_WIDGET(gtk_builder_get_object(file_saver_builder, "file_saver_window"));
+  gtk_builder_connect_signals(file_saver_builder,NULL);
+
+  entry = GTK_WIDGET(gtk_builder_get_object(file_saver_builder, "file_name"));
+
+  button =  GTK_WIDGET(gtk_builder_get_object(file_saver_builder, "btn_save_filename"));
+  g_signal_connect (button, "clicked", G_CALLBACK (on_btn_save_filename_clicked), (gpointer) entry);
+
+  g_object_unref(file_saver_builder);
+
+  gtk_widget_show_all(file_saver_window);
+  gtk_main();
+}
+
+
 void solve_requipmentEquipment_problem(GtkWidget *widget, gpointer   data){
   printf("Let's do this!\n" );
   GtkWidget  *entrada;
@@ -127,6 +188,7 @@ void solve_requipmentEquipment_problem(GtkWidget *widget, gpointer   data){
       }
     }
   }
+  writeFile();
 }
 
 
