@@ -8,7 +8,6 @@
 GtkWidget *entry_initial_price;
 GtkWidget *entry_useful_life;
 GtkWidget *entry_project_term;
-
 GtkBuilder      *file_saver_builder;
 GtkWidget       *file_saver_window;
 GtkFileChooser *file_chooser;
@@ -23,6 +22,9 @@ GtkBuilder      *initial_equipment_table_builder;
 GtkWidget       *initial_equipment_table_window;
 GtkWidget       *initial_equipment_table;
 GtkWidget ***entrada;
+
+int *global_mantenimiento;
+int *global_ventas;
 
 void printSolution(int  **dist, int numbOfObj)
 {
@@ -99,33 +101,32 @@ void on_btn_save_filename_clicked(GtkWidget *widget, gpointer   data){
   printf("voya a guaradr\n" );
   strcpy(file_name_buffer, gtk_entry_get_text (data));
   strcat(file_name_buffer, ".txt");
-  printf("El nombre del archivo es: %s\n", file_name_buffer );
-  //Archivo en el que se graba información
-  FILE * output;
-  int j, i;
-  char file_value[5];
-  output= fopen( file_name_buffer, "w+");
-
-  // printf("Prueba de nombre de objetos\n");
-  // for (i = 0; i<numbOfObj ; i++) printf("Objeto %d = %s\n",i, column_names[i] );
-
-  	// for(j=0;j<numbOfObj;j++){
-    //
-  	// 	fprintf(output, "%s|",column_names[j]);
-  	// 	snprintf(file_value,5,"%d",global_quantity[j]);
-  	// 	fprintf(output, "%s|",file_value);
-  	// 	clear_file_buffer(file_value);
-  	// 	snprintf(file_value,5,"%d",global_weights[j]);
-  	// 	fprintf(output, "%s|",file_value);
-  	// 	clear_file_buffer(file_value);
-  	// 	snprintf(file_value,5,"%d",global_values[j]);
-  	// 	fprintf(output, "%s",file_value);
-  	// 	fprintf(output, "\n");
-  	// }
+  if (strcmp(gtk_entry_get_text (data), "") == 0){
+    create_warning_window("Debe ingresar un nombre valido.");
+  }
+  else{
+    printf("El nombre del archivo es: %s\n", file_name_buffer );
+    //Archivo en el que se graba información
+    FILE * output;
+    int j, i;
+    char file_value[5];
+    output= fopen( file_name_buffer, "w+");
 
 
+      for(j=0;j<useful_life;j++){
+      	snprintf(file_value,5,"%d",global_mantenimiento[j]);
+      	fprintf(output, "%s|",file_value);
+      	clear_file_buffer(file_value);
+      	snprintf(file_value,5,"%d",global_ventas[j]);
+      	fprintf(output, "%s",file_value);
+      	clear_file_buffer(file_value);
+      	fprintf(output, "\n");
+      }
 
-  fclose(output);
+    fclose(output);
+    gtk_widget_destroy (file_saver_window);
+  }
+
 }
 
 void writeFile(){
@@ -150,6 +151,62 @@ void writeFile(){
   gtk_main();
 }
 
+int array_min(int array[project_term+1]){
+  int minimum = array[0];
+  int c;
+  int location;
+    for ( c = 1 ; c < project_term+1 ; c++ )
+    {
+        if ( array[c] < minimum )
+        {
+           minimum = array[c];
+           location = c+1;
+        }
+    }
+    return minimum;
+}
+
+void getEquipmentReplaceSolution(){
+  int C[useful_life+1];
+  int G[project_term+1];// G[0] a G[n]
+  int k, i, j, x;
+  int R[project_term+1];
+
+
+  C[0] = 0;
+  for(k = 0; k <= project_term; k++) R[k] = 99999;
+
+  for (k = 1; k <= useful_life;k++){
+    C[k] =  initial_price;
+    for (i = 1; i <= k;i++){
+      C[k] +=global_mantenimiento[i];
+    }
+    C[k]= C[k]-global_ventas[k];
+  }
+
+  printf("----------Costos totales------------\n");
+  for (i = 0; i <= useful_life; i ++) printf("%d\n", C[i] );
+  G[project_term] =0;
+  for(i = project_term-1; i>=0; i --){
+    int valor_actual = i;
+    int plazo = project_term;
+    int v = plazo - valor_actual;
+    printf("Valor Actual = %d \n", valor_actual );
+    if(v <= useful_life){
+      int indice = 1;
+      for(j = v; j >=1 ; j--){
+          //printf("C[%d] + G[%d] = %d + %d  = %d\n",j, valor_actual+indice,C[j], G[valor_actual + indice], C[j]+G[valor_actual+indice]);
+          R[valor_actual+indice] = C[j]+G[valor_actual+indice];
+          //printf("R[%d] = %d\n", valor_actual, R[valor_actual] );
+          indice ++;
+          G[valor_actual] = array_min(R);
+          printf("G[%d] = %d\n", valor_actual, G[valor_actual] );
+
+      }
+    }
+      for(k = 0; k <= project_term; k++) R[k] = 99999;
+  }
+}
 
 void solve_requipmentEquipment_problem(GtkWidget *widget, gpointer   data){
   printf("Let's do this!\n" );
@@ -157,10 +214,16 @@ void solve_requipmentEquipment_problem(GtkWidget *widget, gpointer   data){
   entrada = gtk_entry_new();
   gchar* entrance;
   entrance = calloc(1, 500*sizeof(gchar));
-  int i = 0;
+
+  global_mantenimiento = (int) calloc(useful_life+1, sizeof(int));
+  global_ventas = (int) calloc(useful_life+1, sizeof(int));
+
+  global_mantenimiento[0] = 0;
+  global_ventas[0] = 0;
+  int i = 1;
 
   int fila, columna,value =0;
-  int j = 0;
+  int j = 1;
   int k = 0;
   int x = 0;
   for(columna = 0; columna <3; columna++){
@@ -168,27 +231,42 @@ void solve_requipmentEquipment_problem(GtkWidget *widget, gpointer   data){
       entrada = gtk_grid_get_child_at (data, columna, fila);
 
       if(columna == 1){
-        printf("Entrada[%d][%d] = %s\n",columna, fila, gtk_entry_get_text(entrada));
-        // value = atoi(gtk_entry_get_text(entrada));
-        // printf("Value = %d\n",value);
         g_stpcpy(entrance,gtk_entry_get_text(entrada));
         verify_entry = gtk_entry_get_text(entrada);
         if (!is_number(verify_entry)){
           create_warning_window("Las entradas deben ser numericas.");
         }
+        else{
+          global_mantenimiento[i] = atoi(entrance);
+          i++;
+        }
       }
       else if(columna == 2){
-        printf("Entrada[%d][%d] = %s\n",columna, fila, gtk_entry_get_text(entrada));
         g_stpcpy(entrance,gtk_entry_get_text(entrada));
         verify_entry = gtk_entry_get_text(entrada);
         if (!is_number(verify_entry)){
           create_warning_window("Las entradas deben ser numericas.");
+        }
+        else{
+          global_ventas[j] = atoi(entrance);
+          j++;
         }
 
       }
     }
   }
-  writeFile();
+
+  printf("GLOBAL Mantenimiento\n");
+  for(i = 0; i < useful_life; i++){
+    printf("Mantenimiento[%d] = %d\n", i, global_mantenimiento[i]);
+  }
+  printf("GLOBAL Ventas\n");
+  for(i = 0; i < useful_life; i++){
+    printf("Ventas[%d] = %d\n", i, global_ventas[i]);
+  }
+  if(f_manual) writeFile();
+  printf("VOY POR ACA\n");
+  getEquipmentReplaceSolution();
 }
 
 
