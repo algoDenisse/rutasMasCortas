@@ -184,32 +184,30 @@ void getEquipmentReplaceSolution(){
     C[k]= C[k]-global_ventas[k];
   }
 
-  printf("----------Costos totales------------\n");
-  for (i = 0; i <= useful_life; i ++) printf("%d\n", C[i] );
   G[project_term] =0;
   for(i = project_term-1; i>=0; i --){
     int valor_actual = i;
     int plazo = project_term;
     int v = plazo - valor_actual;
-    printf("Valor Actual = %d \n", valor_actual );
-    if(v <= useful_life){
-      int indice = 1;
-      for(j = v; j >=1 ; j--){
-          //printf("C[%d] + G[%d] = %d + %d  = %d\n",j, valor_actual+indice,C[j], G[valor_actual + indice], C[j]+G[valor_actual+indice]);
-          R[valor_actual+indice] = C[j]+G[valor_actual+indice];
-          //printf("R[%d] = %d\n", valor_actual, R[valor_actual] );
-          indice ++;
-          G[valor_actual] = array_min(R);
-          printf("G[%d] = %d\n", valor_actual, G[valor_actual] );
-
+    //printf("Valor Actual = %d \n", valor_actual );
+    int indice = 1;
+    for(k = 1; k<=v; k++){
+      if(k <= useful_life){
+        //printf("R[%d] = C[%d] + G[%d] = %d + %d = %d\n",valor_actual+indice,k, valor_actual+indice,C[k], G[valor_actual+indice], C[k]+G[valor_actual+indice]);
+        R[valor_actual+indice] = C[k]+G[valor_actual+indice];
+        indice ++;
       }
     }
-      for(k = 0; k <= project_term; k++) R[k] = 99999;
+    G[valor_actual] = array_min(R);
+    printf("G[%d] = %d\n", valor_actual, G[valor_actual] );
+    for(k = 0; k <= project_term; k++) R[k] = 99999;
+
   }
+
 }
 
 void solve_requipmentEquipment_problem(GtkWidget *widget, gpointer   data){
-  printf("Let's do this!\n" );
+//  printf("Let's do this!\n" );
   GtkWidget  *entrada;
   entrada = gtk_entry_new();
   gchar* entrance;
@@ -256,14 +254,14 @@ void solve_requipmentEquipment_problem(GtkWidget *widget, gpointer   data){
     }
   }
 
-  printf("GLOBAL Mantenimiento\n");
-  for(i = 0; i < useful_life; i++){
-    printf("Mantenimiento[%d] = %d\n", i, global_mantenimiento[i]);
-  }
-  printf("GLOBAL Ventas\n");
-  for(i = 0; i < useful_life; i++){
-    printf("Ventas[%d] = %d\n", i, global_ventas[i]);
-  }
+  // printf("GLOBAL Mantenimiento\n");
+  // for(i = 0; i < useful_life; i++){
+  //   printf("Mantenimiento[%d] = %d\n", i, global_mantenimiento[i]);
+  // }
+  // printf("GLOBAL Ventas\n");
+  // for(i = 0; i < useful_life; i++){
+  //   printf("Ventas[%d] = %d\n", i, global_ventas[i]);
+  // }
   if(f_manual) writeFile();
   printf("VOY POR ACA\n");
   getEquipmentReplaceSolution();
