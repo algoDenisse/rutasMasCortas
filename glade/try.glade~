@@ -114,7 +114,10 @@ contiene valores menores que el que contiene dicho nodo, y el subárbol derecho
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Multiplicaicion de Matrices</property>
+                <property name="tooltip_text" translatable="yes"> Operación de composición efectuada entre dos
+ matrices, o bien la multiplicación entre una
+ matriz y un escalar según unas determinadas
+ reglas.</property>
                 <signal name="clicked" handler="btn_algoritmo6_clicked_cb" swapped="no"/>
               </object>
               <packing>

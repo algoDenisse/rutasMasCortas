@@ -25,6 +25,7 @@ GtkWidget ***entrada;
 
 int *global_mantenimiento;
 int *global_ventas;
+int *global_ganancias;
 
 
 void printSolution(int  **dist, int numbOfObj)
@@ -293,7 +294,9 @@ void getEquipmentReplaceSolution(){
     for (i = 1; i <= k;i++){
       C[k] +=global_mantenimiento[i];
     }
-    C[k]= C[k]-global_ventas[k];
+    C[k]= C[k]-global_ventas[k]-global_ganancias[k];
+    printf("C[%d]=%d\n",k,C[k]);
+
   }
 
   G[project_term] =0;
@@ -348,6 +351,7 @@ void solve_requipmentEquipment_problem(GtkWidget *widget, gpointer   data){
 
   global_mantenimiento = (int) calloc(useful_life+1, sizeof(int));
   global_ventas = (int) calloc(useful_life+1, sizeof(int));
+  global_ganancias = (int) calloc(useful_life+1, sizeof(int));
 
   global_mantenimiento[0] = 0;
   global_ventas[0] = 0;
@@ -357,15 +361,16 @@ void solve_requipmentEquipment_problem(GtkWidget *widget, gpointer   data){
   int j = 1;
   int k = 0;
   int x = 0;
-  for(columna = 0; columna <3; columna++){
+  int d = 0;
+  for(columna = 0; columna <4; columna++){
     for(fila = 1; fila <= useful_life; fila++){
       entrada = gtk_grid_get_child_at (data, columna, fila);
 
       if(columna == 1){
         g_stpcpy(entrance,gtk_entry_get_text(entrada));
         verify_entry = gtk_entry_get_text(entrada);
-        if (!is_number(verify_entry)){
-          create_warning_window("Las entradas deben ser numericas.");
+        if (!is_number(verify_entry) || strcmp(verify_entry, "") ==0){
+          create_warning_window("Las entradas deben ser numéricas.");
         }
         else{
           global_mantenimiento[i] = atoi(entrance);
@@ -375,12 +380,24 @@ void solve_requipmentEquipment_problem(GtkWidget *widget, gpointer   data){
       else if(columna == 2){
         g_stpcpy(entrance,gtk_entry_get_text(entrada));
         verify_entry = gtk_entry_get_text(entrada);
-        if (!is_number(verify_entry)){
+        if (!is_number(verify_entry) || strcmp(verify_entry, "") ==0){
           create_warning_window("Las entradas deben ser numericas.");
         }
         else{
           global_ventas[j] = atoi(entrance);
           j++;
+        }
+
+      }
+      else if(columna == 3){
+        g_stpcpy(entrance,gtk_entry_get_text(entrada));
+        verify_entry = gtk_entry_get_text(entrada);
+        if (!is_number(verify_entry) || strcmp(verify_entry, "") ==0){
+          create_warning_window("Las entradas deben ser numericas.");
+        }
+        else{
+          global_ganancias[d] = atoi(entrance);
+          d++;
         }
 
       }
@@ -391,10 +408,10 @@ void solve_requipmentEquipment_problem(GtkWidget *widget, gpointer   data){
   // for(i = 0; i < useful_life; i++){
   //   printf("Mantenimiento[%d] = %d\n", i, global_mantenimiento[i]);
   // }
-  // printf("GLOBAL Ventas\n");
-  // for(i = 0; i < useful_life; i++){
-  //   printf("Ventas[%d] = %d\n", i, global_ventas[i]);
-  // }
+  printf("GLOBAL Ganancias\n");
+  for(i = 0; i < useful_life; i++){
+    printf("Ganancias[%d] = %d\n", i, global_ganancias[i]);
+  }
   if(f_manual){
      writeFile();
      printf("%s\n","Manual" );
@@ -430,7 +447,7 @@ void create_entry_window(){
 
 	//loops to create grid
 	for(j=0;j<useful_life+1;j++){ //filas
-		for(k =0; k< 3;k++){ //columnas
+		for(k =0; k< 4;k++){ //columnas
 			entrada[j][k]= gtk_entry_new();
 			gtk_grid_attach (GTK_GRID (initial_equipment_table),entrada[j][k] , k, j, 1, 1);
 			//printf("Puse la pos[%d][%d]\n",j,k );
@@ -455,9 +472,13 @@ void create_entry_window(){
 	gtk_widget_set_sensitive (entrada[0][2], FALSE);
 	gtk_widget_set_name(entrada[0][2], "column_name");
 
+  gtk_entry_set_text (entrada[0][3],"Ganancia");
+	gtk_widget_set_sensitive (entrada[0][3], FALSE);
+	gtk_widget_set_name(entrada[0][3], "column_name");
+
 
 	button_box = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
-	gtk_grid_attach (GTK_GRID (initial_equipment_table),button_box ,1, j, 1, 2);
+	gtk_grid_attach (GTK_GRID (initial_equipment_table),button_box ,1, j, 2, 2);
 
 	button = gtk_button_new_with_label ("Procesar");
 	g_signal_connect (button, "clicked", G_CALLBACK (solve_requipmentEquipment_problem), (gpointer) initial_equipment_table);
@@ -491,7 +512,7 @@ void update_initial_table(int useful_life){
 
   int i, j;
   for(i = 0; i < useful_life ; i ++){
-    for (j = 0; j<4; j++){
+    for (j = 0; j<5; j++){
 			if(j == 0){
 				pt_entrada = gtk_grid_get_child_at (initial_equipment_table, j, i+1);
         snprintf(intermediate_buffer,5,"%d",i);
@@ -525,7 +546,7 @@ void kn_filechooserbutton_file_set_cb(){
    create_warning_window("Los campos no pueden ser vacíos");
   }
    else{
-     printf("El numero de filas es:%d\n",useful_life);
+     //printf("El numero de filas es:%d\n",useful_life);
      initial_price = atoi(i_price);
      project_term = atoi(p_term);
      useful_life =getObjectsQuantity(filename);
@@ -536,39 +557,45 @@ void kn_filechooserbutton_file_set_cb(){
      for (i = 0; i < useful_life; ++i) {
      		matriz_datos[i] = calloc(useful_life,sizeof(int));
      }
-     char **matriz_datos_iniciales = calloc(useful_life*2, 500*sizeof(char));
+     char **matriz_datos_iniciales = calloc(useful_life*3, 500*sizeof(char));
      //alojamos la memoria para cada espacio del char
-     for (i = 0; i < useful_life*2; ++i) {
+     for (i = 0; i < useful_life*3; ++i) {
      		matriz_datos_iniciales[i] = (char *)malloc(500);
      }
 
      create_entry_window();
+
 
  		file = fopen( filename, "r" );
 		if(file){
 			clear_token_buffer();
 			while ((in_char = getc(file)) != EOF){
 					if((in_char == '|')|| (in_char == '\n')){
+
 							strcpy(matriz_datos_iniciales[k], string_buffer);
 							clear_token_buffer();
 							k++;
 					}
 					else{
+
 						buffer_char(in_char);
+
 					}
 			}
+
 		 }
+
 		else{
 				printf("%s\n","Error al abrir el archivo" );
 			}
       printf("VAmos a imprimir los datos iniciales\n");
-      for (i = 0; i < useful_life*2; ++i) {
+      for (i = 0; i < useful_life*3; ++i) {
          printf("%s\n", matriz_datos_iniciales[i]);
       }
 
       fila, columna,i = 0;
-			for (k = 0; k< useful_life*2 ; k++){
-  			if((k % 2 == 0)&&(k !=0)){
+			for (k = 0; k< useful_life*3 ; k++){
+  			if((k % 3 == 0)&&(k !=0)){
 					fila++;
           columna = 0;
   			}

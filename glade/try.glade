@@ -65,12 +65,13 @@ vértice origen al resto de los vértices en un grafo con pesos
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Reemplazo de Equipos</property>
+                <property name="tooltip_text" translatable="yes">Permite determinar la estrategia óptima de reemplazo de equipos, de modo que maximice la ganancia.</property>
                 <signal name="clicked" handler="btn_algoritmo3_clicked_cb" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
+                <property name="pack_type">end</property>
                 <property name="position">2</property>
               </packing>
             </child>
