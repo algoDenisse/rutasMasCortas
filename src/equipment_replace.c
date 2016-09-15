@@ -26,6 +26,7 @@ GtkWidget ***entrada;
 int *global_mantenimiento;
 int *global_ventas;
 
+
 void printSolution(int  **dist, int numbOfObj)
 {
     int i,j;
@@ -113,7 +114,7 @@ void on_btn_save_filename_clicked(GtkWidget *widget, gpointer   data){
     output= fopen( file_name_buffer, "w+");
 
 
-      for(j=0;j<useful_life;j++){
+      for(j=1;j<=useful_life;j++){
       	snprintf(file_value,5,"%d",global_mantenimiento[j]);
       	fprintf(output, "%s|",file_value);
       	clear_file_buffer(file_value);
@@ -126,6 +127,7 @@ void on_btn_save_filename_clicked(GtkWidget *widget, gpointer   data){
     fclose(output);
     gtk_widget_destroy (file_saver_window);
   }
+  getEquipmentReplaceSolution();
 
 }
 
@@ -148,7 +150,8 @@ void writeFile(){
   g_object_unref(file_saver_builder);
 
   gtk_widget_show_all(file_saver_window);
-  gtk_main();
+
+
 }
 
 int array_min(int array[project_term+1]){
@@ -159,19 +162,128 @@ int array_min(int array[project_term+1]){
     {
         if ( array[c] < minimum )
         {
+
            minimum = array[c];
-           location = c+1;
+
+
         }
     }
+
+    printf("Minimo:%d\n", minimum);
     return minimum;
+}
+
+//debe recibir listas donde esta g(t)
+void create_final_table(int pG[project_term+1],int pRutas[project_term+1][project_term+1]){
+  GtkWidget *window;
+	GtkWidget *scrolledwindow;
+  GtkWidget *table;
+  GtkWidget *button;
+  GtkWidget *button_box;
+
+  /* create a new window */
+   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+   gtk_window_set_title (GTK_WINDOW (window),"G(t) Table");
+
+   /*Scrolled window*/
+
+	 scrolledwindow = gtk_scrolled_window_new(NULL,NULL);
+	 gtk_widget_set_size_request(scrolledwindow, 600, 300);
+
+
+	 gtk_container_add (GTK_CONTAINER (window), scrolledwindow);
+
+   // create new table
+   table= gtk_grid_new();
+   gtk_grid_set_row_spacing (GTK_GRID (table), 2);
+   gtk_container_add (GTK_CONTAINER (scrolledwindow), table);
+
+   int j,k,i,t,column_number;
+   column_number=0;
+   t=0;
+   char pt_cell_value[25];
+   char cell_value[25];
+   char gt_cell_value[25];
+   strcpy(gt_cell_value,"");
+   GtkWidget ***entrada;
+   //create entries dinamically
+   entrada=calloc(project_term,2 + sizeof(GtkWidget**));
+   for(j = 0; j < project_term+1; j++){
+     entrada[j]=calloc(project_term,2+sizeof(GtkWidget*));
+   }
+
+   for(k =0; k< project_term+2;k++){
+     for(j=0;j<3;j++){
+			 entrada[j][k]= gtk_entry_new ();
+       gtk_widget_set_sensitive (entrada[j][k], FALSE);
+       gtk_grid_attach (GTK_GRID (table),entrada[j][k] , j, k, 1, 1);
+
+       if(j == 0 && k!=0){
+         snprintf(pt_cell_value,25,"%d",column_number);
+         gtk_entry_set_text (entrada[j][k],pt_cell_value);
+         printf("column_number:%d\n",column_number );
+         column_number++;
+       }
+       if(j ==1 && k!=0){
+         snprintf(cell_value,25,"%d",pG[k-1]);
+         gtk_entry_set_text (entrada[j][k],cell_value);
+       }
+       if(j==2 && k!=0){
+         strcpy(gt_cell_value,"");
+         char temp_value[5];
+         for ( t = 0; t < project_term+1; t++){
+
+            if(pRutas[k-1][t] != -1){
+              //printf("rutas[%d][%d] = %d\n", k-1,t,pRutas[k-1][t]);
+
+              snprintf(temp_value,25,"%d,",pRutas[k-1][t]);
+              strcat(gt_cell_value,temp_value);
+            }
+
+
+         }
+         printf("Cell value:%s\n", gt_cell_value);
+         gtk_entry_set_text (entrada[j][k],gt_cell_value);
+
+       }
+
+
+		 }
+
+    }
+
+  //Agrego nombres de primera fila: estáticos
+
+  gtk_entry_set_text (entrada[0][0],"t");
+	gtk_widget_set_sensitive (entrada[0][0], FALSE);
+	gtk_widget_set_name(entrada[0][0], "column_name");
+
+  gtk_entry_set_text (entrada[1][0],"G(t)");
+	gtk_widget_set_sensitive (entrada[1][0], FALSE);
+	gtk_widget_set_name(entrada[1][0], "column_name");
+
+  gtk_entry_set_text (entrada[2][0],"Próximo");
+	gtk_widget_set_sensitive (entrada[2][0], FALSE);
+	gtk_widget_set_name(entrada[2][0], "column_name");
+
+  gtk_entry_set_text (entrada[2][project_term+1],"0");
+
+  gtk_widget_show_all(window);
 }
 
 void getEquipmentReplaceSolution(){
   int C[useful_life+1];
   int G[project_term+1];// G[0] a G[n]
-  int k, i, j, x;
+  int k, i, j, x,location;
   int R[project_term+1];
+  int rutas[project_term+1][project_term+1];
 
+  //Leno matriz de rutas con -1
+  for(k = 0; k <= project_term; k++){
+    for(i = 0;i<= project_term;i++){
+      rutas[k][i] = -1;
+    }
+  }
 
   C[0] = 0;
   for(k = 0; k <= project_term; k++) R[k] = 99999;
@@ -198,11 +310,32 @@ void getEquipmentReplaceSolution(){
         indice ++;
       }
     }
+    for(k = 0; k <= project_term; k++) printf("R[%d] = %d\n",k,R[k]);
     G[valor_actual] = array_min(R);
-    printf("G[%d] = %d\n", valor_actual, G[valor_actual] );
+    for ( k = 1 ; k < project_term+1 ; k++ )
+    {
+      if(R[k]==G[valor_actual]){
+        location = k;
+        rutas[valor_actual][location] = location;
+        printf("Location:%d\n",location );
+      }
+    }
+    //printf("G[%d] = %d\n", valor_actual, G[valor_actual] );
+    //exit(0);
     for(k = 0; k <= project_term; k++) R[k] = 99999;
 
+
   }
+
+  for (i = 0; i < project_term+1; i++)
+  {
+      for ( j = 0; j < project_term+1; j++)
+      {
+          printf ("%7d", rutas[i][j]);
+      }
+      printf("\n");
+  }
+  create_final_table(G,rutas);
 
 }
 
@@ -262,9 +395,16 @@ void solve_requipmentEquipment_problem(GtkWidget *widget, gpointer   data){
   // for(i = 0; i < useful_life; i++){
   //   printf("Ventas[%d] = %d\n", i, global_ventas[i]);
   // }
-  if(f_manual) writeFile();
-  printf("VOY POR ACA\n");
-  getEquipmentReplaceSolution();
+  if(f_manual){
+     writeFile();
+     printf("%s\n","Manual" );
+   }
+   else{
+     printf("%s\n","Archivo" );
+     getEquipmentReplaceSolution();
+   }
+  //printf("VOY POR ACA\n");
+
 }
 
 
@@ -381,6 +521,9 @@ void kn_filechooserbutton_file_set_cb(){
      create_warning_window("El tipo de dato debe ser entero");
 
    }
+   else if(strcmp(gtk_entry_get_text (entry_initial_price), "") ==0 || strcmp(gtk_entry_get_text (entry_useful_life), "") ==0 || strcmp(gtk_entry_get_text (entry_project_term), "") ==0 ){
+   create_warning_window("Los campos no pueden ser vacíos");
+  }
    else{
      printf("El numero de filas es:%d\n",useful_life);
      initial_price = atoi(i_price);
@@ -463,6 +606,9 @@ void btn_ok_clicked_cb(){
     create_warning_window("El tipo de dato debe ser entero");
 
   }
+  else if(strcmp(gtk_entry_get_text (entry_initial_price), "") ==0 || strcmp(gtk_entry_get_text (entry_useful_life), "") ==0 || strcmp(gtk_entry_get_text (entry_project_term), "") ==0 ){
+   create_warning_window("Los campos no pueden ser vacíos");
+ }
   else{
     f_manual = TRUE;
     initial_price = atoi(i_price);
