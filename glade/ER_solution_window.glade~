@@ -17,7 +17,7 @@
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkLabel" id="label1">
-                <property name="name">title</property>
+                <property name="name">column_name</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">label</property>

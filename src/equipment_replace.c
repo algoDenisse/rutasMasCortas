@@ -26,6 +26,9 @@ GtkWidget ***entrada;
 int *global_mantenimiento;
 int *global_ventas;
 int *global_ganancias;
+char solution[1024];
+char intermedio[506];
+char inicio[506];
 
 
 void printSolution(int  **dist, int numbOfObj)
@@ -188,16 +191,16 @@ void create_final_table(int pG[project_term+1],int pRutas[project_term+1][projec
 
    /*Scrolled window*/
 
-	 scrolledwindow = gtk_scrolled_window_new(NULL,NULL);
-	 gtk_widget_set_size_request(scrolledwindow, 600, 300);
+	 //scrolledwindow = gtk_scrolled_window_new(NULL,NULL);
+	 //gtk_widget_set_size_request(scrolledwindow, 400, 200);
 
 
-	 gtk_container_add (GTK_CONTAINER (window), scrolledwindow);
+	 //gtk_container_add (GTK_CONTAINER (window), scrolledwindow);
 
    // create new table
    table= gtk_grid_new();
    gtk_grid_set_row_spacing (GTK_GRID (table), 2);
-   gtk_container_add (GTK_CONTAINER (scrolledwindow), table);
+   gtk_container_add (GTK_CONTAINER (window), table);
 
    int j,k,i,t,column_number;
    column_number=0;
@@ -272,6 +275,70 @@ void create_final_table(int pG[project_term+1],int pRutas[project_term+1][projec
   gtk_widget_show_all(window);
 }
 
+void displayValues(){
+  GtkBuilder      *ER_solution_builder;
+
+  GtkWidget       *ER_solution_label1;
+  GtkWidget       *ER_solution_label2;
+  GtkWidget       *ER_solution_window;
+
+
+  ER_solution_builder = gtk_builder_new();
+  gtk_builder_add_from_file (ER_solution_builder, "glade/ER_solution_window.glade", NULL);
+
+  ER_solution_window = GTK_WIDGET(gtk_builder_get_object(ER_solution_builder, "ER_solution_window"));
+  gtk_builder_connect_signals(ER_solution_builder,NULL);
+
+  gtk_widget_set_size_request(ER_solution_window, 400, 200);
+
+  ER_solution_label1 = GTK_WIDGET(gtk_builder_get_object(ER_solution_builder, "label1"));
+  ER_solution_label2 = GTK_WIDGET(gtk_builder_get_object(ER_solution_builder, "label2"));
+
+  gtk_label_set_text (ER_solution_label1,"Planes Óptimos:");
+  gtk_label_set_text (ER_solution_label2,solution);
+
+  g_object_unref(ER_solution_builder);
+
+  gtk_widget_show_all(ER_solution_window);
+
+}
+
+void getRoutes_i(int fila, int  pRutas[project_term+1][project_term+1]){
+  int i;
+  bool isBeginning=TRUE;
+  for (i = 0; i<= project_term; i++){
+    if(pRutas[fila][i]!= -1){
+      snprintf(intermedio, 506, "-->%d", pRutas[fila][i]);
+      if(!isBeginning){
+        strcat(solution,inicio);
+      }
+
+      strcat(solution,intermedio);
+      printf("--> %d", pRutas[fila][i]);
+      isBeginning=FALSE;
+      getRoutes_i(pRutas[fila][i], pRutas);
+    }
+  }
+  strcat(solution,"\n");
+  printf("\n");
+}
+
+void getRoutes(int pRutas[project_term+1][project_term+1]){
+  printf("YA ebtreee\n" );
+  int fila, columna, i, j;
+  for(fila = 0; fila <1; fila ++){
+    for(columna = 0; columna<= project_term; columna++ ){
+      if(pRutas[fila][columna]!= -1){
+        snprintf(intermedio, 506, "0 -->%d", pRutas[fila][columna]);
+        strcat(solution,intermedio);
+        strcpy(inicio,intermedio);
+        printf("0 -->  %d",pRutas[fila][columna] );
+        getRoutes_i(pRutas[fila][columna], pRutas);
+      }
+    }
+  }
+}
+
 void getEquipmentReplaceSolution(){
   int C[useful_life+1];
   int G[project_term+1];// G[0] a G[n]
@@ -338,7 +405,9 @@ void getEquipmentReplaceSolution(){
       }
       printf("\n");
   }
+  getRoutes(rutas);
   create_final_table(G,rutas);
+  displayValues();
 
 }
 
@@ -383,9 +452,17 @@ void solve_requipmentEquipment_problem(GtkWidget *widget, gpointer   data){
         if (!is_number(verify_entry) || strcmp(verify_entry, "") ==0){
           create_warning_window("Las entradas deben ser numericas.");
         }
+
+
+
         else{
-          global_ventas[j] = atoi(entrance);
-          j++;
+          if(atoi(verify_entry)>=initial_price){
+            create_warning_window("El precio de Reventa no puede ser mayor o igual que el Costo Inicial");
+          }
+          else{
+            global_ventas[j] = atoi(entrance);
+            j++;
+          }
         }
 
       }
