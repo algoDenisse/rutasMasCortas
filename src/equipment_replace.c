@@ -340,6 +340,9 @@ void getRoutes(int pRutas[project_term+1][project_term+1]){
 }
 
 void getEquipmentReplaceSolution(){
+  strcpy(solution, "");
+  strcpy(intermedio, "");
+  strcpy(inicio, "");
   int C[useful_life+1];
   int G[project_term+1];// G[0] a G[n]
   int k, i, j, x,location;
@@ -359,9 +362,9 @@ void getEquipmentReplaceSolution(){
   for (k = 1; k <= useful_life;k++){
     C[k] =  initial_price;
     for (i = 1; i <= k;i++){
-      C[k] +=global_mantenimiento[i];
+      C[k] +=global_mantenimiento[i]-global_ganancias[i];
     }
-    C[k]= C[k]-global_ventas[k]-global_ganancias[k];
+    C[k]= C[k]-global_ventas[k];
     printf("C[%d]=%d\n",k,C[k]);
 
   }
