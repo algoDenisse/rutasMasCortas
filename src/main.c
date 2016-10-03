@@ -81,7 +81,7 @@ void btn_algoritmo4_clicked_cb(){
     system("./pending_program &");
 }
 void btn_algoritmo5_clicked_cb(){
-    system("./pending_program &");
+    system("./series_deportivas &");
 }
 void btn_algoritmo6_clicked_cb(){
     system("./pending_program &");

@@ -4,6 +4,7 @@ PENDING=pending_program
 FLOYD=floyd
 KNAPSACK=knapsack
 EQREPLACE=equipment_replace
+SDEPORTIVAS=series_deportivas
 
 # compiler
 CC=gcc
@@ -29,14 +30,15 @@ POBJ= pending_program.o
 FOBJ= floyd.o
 KNOBJ=knapsack.o
 EROBJ=equipment_replace.o
+SDOBJ=series_deportivas.o
 
-
-all: $(OBJS) $(POBJ) $(FOBJ) $(KNOBJ) $(EROBJ)
+all: $(OBJS) $(POBJ) $(FOBJ) $(KNOBJ) $(EROBJ) $(SDOBJ)
 	$(LD) -o $(TARGET) $(OBJS) $(LDFLAGS)
 	$(LD) -o $(PENDING) $(POBJ) $(LDFLAGS)
 	$(LD) -o $(FLOYD) $(FOBJ) $(LDFLAGS)
 	$(LD) -o $(KNAPSACK) $(KNOBJ) $(LDFLAGS)
 	$(LD) -o $(EQREPLACE) $(EROBJ) $(LDFLAGS)
+	$(LD) -o $(SDEPORTIVAS) $(SDOBJ) $(LDFLAGS)
 
 
 
@@ -59,6 +61,10 @@ knapsack.o: src/knapsack.c
 equipment_replace.o: src/equipment_replace.c
 
 	$(CC) -c $(CCFLAGS) src/equipment_replace.c $(GTKLIB) -o equipment_replace.o -w
+
+series_deportivas.o: src/series_deportivas.c
+
+	$(CC) -c $(CCFLAGS) src/series_deportivas.c $(GTKLIB) -o series_deportivas.o -w
 
 
 
