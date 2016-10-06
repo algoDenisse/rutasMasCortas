@@ -56,7 +56,10 @@ background-image: -gtk-gradient (linear,
              color-stop(0.50,rgba(37,129,205,1)),
              color-stop(0.51,rgba(30,115,190,1)),
            color-stop(1.00,rgba(107,176,229,1)));
+}
 
+#toggle_btn:active{
+  background-image: linear-gradient(orange);
 }
 
 #btn_salir:hover,
@@ -67,6 +70,7 @@ background-image: -gtk-gradient (linear,
 #btn_cerrar:prelight {
    background-image: linear-gradient(red);
 }
+
 
 
 #lbl_mensaje{
