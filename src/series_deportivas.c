@@ -1,10 +1,12 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <math.h>
 
 GtkWidget *number_games, *ph_entry, *pr_entry, *partida, *warning_window;
 GtkBuilder      *series_deportivas_table_builder;
 GtkWidget       *series_deportivas_table_window;
+GtkWidget       *series_deportivas_table_scrolledwindow;
 GtkWidget       *series_deportivas_table;
 
 GtkBuilder      *file_saver_builder;
@@ -15,6 +17,8 @@ GtkWidget **entrada;
 
 int ph,pr,charPos,number_of_games, defining_games_quantity = 0;
 int *global_numberofgames;
+int *matriz_datos;
+double **matriz_solution;
 
 double ph_double;
 double qr_double;
@@ -84,7 +88,64 @@ void update_global_numberofgames(GtkWidget *widget, gpointer   data){
 	}
 }
 
+void printSolution(double **dist)
+{
+    int i,j;
+    for (i = 0; i < defining_games_quantity+1; i++)
+    {
+        for ( j = 0; j < defining_games_quantity+1; j++)
+        {
+            printf ("%10.4f", dist[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void calculateProbabilities(){
+	int i, j, nextgame, games2go = 0;
+
+	for(i =0; i < number_of_games; i++) printf("global_numberofgames[%d] = %d\n",i, global_numberofgames[i]);
+
+	matriz_solution = calloc(defining_games_quantity+1, 1+sizeof(double*));
+	for (i = 0; i < defining_games_quantity+1; ++i) {
+		 matriz_solution[i] = calloc(defining_games_quantity+1,sizeof(double));
+	}
+
+	for (i = 0; i < defining_games_quantity+1; i++){
+		for ( j = 0; j < defining_games_quantity+1; j++){
+			if(i == 0 && j !=0 ){
+				matriz_solution[i][j] = 1.00;
+			}
+			else if (j == 0 && i != 0){
+				matriz_solution[i][j] = 0.00;
+			}
+			else if (j == 0 && i ==0){
+				matriz_solution[i][j] = -1.00;
+			}
+			else{
+				games2go =((defining_games_quantity - i)+(defining_games_quantity -j));
+				// printf("i = %d, j= %d\n", i, j );
+				// printf("G2G = %d\n", games2go );
+				if(global_numberofgames[games2go] == 1){
+					matriz_solution[i][j] = (matriz_solution[i-1][j] * floorf(ph_double* 100) / 100 + matriz_solution[i][j-1] * floorf(qr_double* 100) / 100);
+				}
+				else{
+					matriz_solution[i][j] = (matriz_solution[i-1][j] * floorf(pr_double* 100) / 100 + matriz_solution[i][j-1] * floorf(qh_double* 100) / 100);
+				}
+			}
+
+		}
+	}
+
+	printSolution(matriz_solution);
+}
+
+
 void solve_series_deportivas_problem(){
+	//Solve Matrix
+
+	calculateProbabilities();
+
 	char game_number[25];
 	series_deportivas_table_builder= gtk_builder_new();
   gtk_builder_add_from_file (series_deportivas_table_builder, "glade/initial_series_deportivas_table_window.glade", NULL);
@@ -92,10 +153,12 @@ void solve_series_deportivas_problem(){
   series_deportivas_table_window = GTK_WIDGET(gtk_builder_get_object(series_deportivas_table_builder, "initial_series_deportivas_table_window"));
   gtk_builder_connect_signals(series_deportivas_table_builder, NULL);
 
+  series_deportivas_table_scrolledwindow = GTK_WIDGET(gtk_builder_get_object(series_deportivas_table_builder, "initial_series_deportivas_table_scrolledwindow"));
+	gtk_builder_connect_signals(series_deportivas_table_builder, NULL);
+
   series_deportivas_table= gtk_grid_new();
   gtk_grid_set_row_spacing (GTK_GRID (series_deportivas_table), 2);
-  gtk_container_add (GTK_CONTAINER (series_deportivas_table_window), series_deportivas_table);
-
+  gtk_container_add (GTK_CONTAINER (series_deportivas_table_scrolledwindow), series_deportivas_table);
 
   GtkWidget ***entrada;
 	int j,k,i;
@@ -180,12 +243,15 @@ void on_load_file_button_file_set(){
   FILE *file;
   gchar *filename;
   int i,k, in_char, ind = 0;
+	bool passed = TRUE;
 
 	char **matriz_datos_iniciales = calloc(3, 500*sizeof(char));
 	//alojamos la memoria para cada espacio del char
 	for (i = 0; i < 3; ++i) {
 		 matriz_datos_iniciales[i] = (char *)malloc(500);
 	}
+
+	matriz_datos =  calloc(3, 1+sizeof(int));
 
   filename=gtk_file_chooser_get_filename (file_chooser);
   file = fopen( filename, "r" );
@@ -194,9 +260,21 @@ void on_load_file_button_file_set(){
       while ((in_char = getc(file)) != EOF){
           if((in_char == '|')|| (in_char == '\n')){
 						 strcpy(matriz_datos_iniciales[ind], string_buffer);
-						 ind ++;
-              clear_token_buffer();
-              k++;
+						 if(!is_number(matriz_datos_iniciales[ind])){
+							 create_warning_window("El tipo de dato debe ser entero");
+							 passed = FALSE;
+						 }
+						 else if(strcmp(matriz_datos_iniciales[ind], "")== 0){
+							 create_warning_window("Los campos no pueden ser vacíos");
+							 passed = FALSE;
+						 }
+						 else{
+							 matriz_datos[ind] = atoi(matriz_datos_iniciales[ind]);
+								ind ++;
+								clear_token_buffer();
+								k++;
+						 }
+
           }
           else{
             buffer_char(in_char);
@@ -208,22 +286,13 @@ void on_load_file_button_file_set(){
       }
 
 			for (i = 0; i < 3; ++i) {
-				 printf("MAtriz[%d] = %s\n",i,  matriz_datos_iniciales[i]);
+				 printf("MAtriz[%d] = %d\n",i,  matriz_datos[i]);
 			}
-		int i_ph = matriz_datos_iniciales[0];
-		int i_pr = matriz_datos_iniciales[1];
-		int i_number_of_games = matriz_datos_iniciales[2];
-		if(strcmp(matriz_datos_iniciales[0], "") ==0 || strcmp(matriz_datos_iniciales[1], "") ==0 || strcmp(matriz_datos_iniciales[2], "") ==0 ){
-		  create_warning_window("Los campos no pueden ser vacíos");
-		}
-		else if(!is_number(ph) || !is_number(pr) || !is_number(number_of_games)){
-		  create_warning_window("El tipo de dato debe ser entero");
-		}
-		 else{
-			 ph = atoi(i_ph);
-			 pr = atoi(i_pr);
-			 number_of_games = atoi(i_number_of_games);
 
+		if (passed){
+			ph = matriz_datos[1];
+			pr =  matriz_datos[2];
+			number_of_games =  matriz_datos[0];
 			 printf("ALL GOOD :) \n");
 			 ph_double = (double) ph / 100;
 			 qr_double = 1 - ph_double;
@@ -238,8 +307,10 @@ void on_load_file_button_file_set(){
 			defining_games_quantity = (number_of_games + 1) / 2;
 			printf("DEFIING GAMES QUANTITY = %d\n", defining_games_quantity );
 			for(k = 0; k < number_of_games; k++) global_numberofgames[k] = 0;
-			 create_buttons_window();
-		 }
+			create_buttons_window();
+
+
+		}
 }
 
 void on_create_button_clicked(){
