@@ -8,6 +8,8 @@ GtkBuilder      *series_deportivas_table_builder;
 GtkWidget       *series_deportivas_table_window;
 GtkWidget       *series_deportivas_table_scrolledwindow;
 GtkWidget       *series_deportivas_table;
+GtkBuilder      *file_saver_builder;
+GtkWidget       *file_saver_window;
 
 GtkBuilder      *file_saver_builder;
 GtkWidget       *file_saver_window;
@@ -104,8 +106,6 @@ void printSolution(double **dist)
 void calculateProbabilities(){
 	int i, j, nextgame, games2go = 0;
 
-	for(i =0; i < number_of_games; i++) printf("global_numberofgames[%d] = %d\n",i, global_numberofgames[i]);
-
 	matriz_solution = calloc(defining_games_quantity+1, 1+sizeof(double*));
 	for (i = 0; i < defining_games_quantity+1; ++i) {
 		 matriz_solution[i] = calloc(defining_games_quantity+1,sizeof(double));
@@ -136,15 +136,69 @@ void calculateProbabilities(){
 
 		}
 	}
-
-	printSolution(matriz_solution);
 }
 
+void on_btn_save_filename_clicked(GtkWidget *widget, gpointer   data){
+  printf("voya a guaradr\n" );
+  strcpy(file_name_buffer, gtk_entry_get_text (data));
+  strcat(file_name_buffer, ".txt");
+  if (strcmp(gtk_entry_get_text (data), "") == 0){
+    create_warning_window("Debe ingresar un nombre valido.");
+  }
+  else{
+    printf("El nombre del archivo es: %s\n", file_name_buffer );
+    //Archivo en el que se graba información
+    FILE * output;
+    int j, i;
+    char file_value[5];
+    output= fopen( file_name_buffer, "w+");
+
+		printf(" HEY\n");
+
+		snprintf(file_value,5,"%d",number_of_games);
+		fprintf(output, "%s|",file_value);
+	//	clear_file_buffer(file_value);
+		snprintf(file_value,5,"%d",ph);
+		fprintf(output, "%s|",file_value);
+		//clear_file_buffer(file_value);
+		snprintf(file_value,5,"%d",pr);
+		fprintf(output, "%s/n",file_value);
+    fclose(output);
+    gtk_widget_destroy (file_saver_window);
+		create_buttons_window();
+  }
+}
+
+void writeFile(){
+
+  GtkWidget *button;
+  GtkWidget *entry;
+
+
+  file_saver_builder = gtk_builder_new();
+  gtk_builder_add_from_file (file_saver_builder, "glade/file_saver_window.glade", NULL);
+
+  file_saver_window = GTK_WIDGET(gtk_builder_get_object(file_saver_builder, "file_saver_window"));
+  gtk_builder_connect_signals(file_saver_builder,NULL);
+
+  entry = GTK_WIDGET(gtk_builder_get_object(file_saver_builder, "file_name"));
+
+  button =  GTK_WIDGET(gtk_builder_get_object(file_saver_builder, "btn_save_filename"));
+  g_signal_connect (button, "clicked", G_CALLBACK (on_btn_save_filename_clicked), (gpointer) entry);
+
+
+  g_object_unref(file_saver_builder);
+
+  gtk_widget_show_all(file_saver_window);
+
+
+}
 
 void solve_series_deportivas_problem(){
 	//Solve Matrix
 
 	calculateProbabilities();
+	printSolution(matriz_solution);
 
 	char game_number[25];
 	series_deportivas_table_builder= gtk_builder_new();
@@ -183,6 +237,13 @@ void solve_series_deportivas_problem(){
 				gtk_widget_set_name(entrada[k][j], "column_name");
 
       }
+			else if(k !=0 && j!= 0){
+			if( k == defining_games_quantity+1 && j == defining_games_quantity+1){
+					gtk_widget_set_name(entrada[k][j], "new_val");
+				}
+			 snprintf(game_number,25,"%.4f",matriz_solution[j-1][k-1]);
+				gtk_entry_set_text (entrada[k][j],game_number);
+			}
     }
   }
 
@@ -200,6 +261,9 @@ void create_buttons_window(){
 	GtkWidget *table;
 	GtkWidget *button;
 	GtkWidget *button_box;
+	GtkWidget       *label1;
+	GtkWidget       *label2;
+	GtkWidget       *label3;
 
 	/* create a new window */
 	 window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -235,6 +299,16 @@ void create_buttons_window(){
 	button = gtk_button_new_with_label ("Procesar");
 	g_signal_connect (button, "clicked", G_CALLBACK (solve_series_deportivas_problem), NULL);
 	gtk_container_add (GTK_CONTAINER (button_box), button);
+
+	snprintf(game_number,25,"PH: %.2f",ph_double);
+	label1 = gtk_label_new (game_number);
+	gtk_widget_set_name(label1 , "lbl_mensaje");
+	snprintf(game_number,25,"PR: %.2f",pr_double);
+	label2 = gtk_label_new (game_number);
+	gtk_widget_set_name(label2 , "lbl_mensaje");
+
+	gtk_grid_attach (GTK_GRID(table), label1, (j/2)-1, j+5, 1, 2);
+	gtk_grid_attach (GTK_GRID(table), label2, (j/2)+1, j+5, 1, 2);
 
 		gtk_widget_show_all(window);
 }
@@ -342,7 +416,8 @@ void on_create_button_clicked(){
 		defining_games_quantity = (number_of_games + 1) / 2;
 		printf("DEFIING GAMES QUANTITY = %d\n", defining_games_quantity );
 		for(k = 0; k < number_of_games; k++) global_numberofgames[k] = 0;
-    create_buttons_window();
+		writeFile();
+
  }
 }
 
