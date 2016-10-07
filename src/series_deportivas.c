@@ -162,7 +162,8 @@ void on_btn_save_filename_clicked(GtkWidget *widget, gpointer   data){
 		fprintf(output, "%s|",file_value);
 		//clear_file_buffer(file_value);
 		snprintf(file_value,5,"%d",pr);
-		fprintf(output, "%s/n",file_value);
+		fprintf(output, "%s",file_value);
+		fprintf(output, "\n");
     fclose(output);
     gtk_widget_destroy (file_saver_window);
 		create_buttons_window();
@@ -332,6 +333,7 @@ void on_load_file_button_file_set(){
     if(file){
       clear_token_buffer();
       while ((in_char = getc(file)) != EOF){
+				printf("IN char = %d\n", in_char );
           if((in_char == '|')|| (in_char == '\n')){
 						 strcpy(matriz_datos_iniciales[ind], string_buffer);
 						 if(!is_number(matriz_datos_iniciales[ind])){
@@ -344,6 +346,7 @@ void on_load_file_button_file_set(){
 						 }
 						 else{
 							 matriz_datos[ind] = atoi(matriz_datos_iniciales[ind]);
+							 printf("mtx datos iniciale = %d\n", matriz_datos[ind] );
 								ind ++;
 								clear_token_buffer();
 								k++;
@@ -367,19 +370,19 @@ void on_load_file_button_file_set(){
 			ph = matriz_datos[1];
 			pr =  matriz_datos[2];
 			number_of_games =  matriz_datos[0];
-			 printf("ALL GOOD :) \n");
+			 //printf("ALL GOOD :) \n");
 			 ph_double = (double) ph / 100;
 			 qr_double = 1 - ph_double;
 			 pr_double = (double) pr / 100;
 			 qh_double = 1 - pr_double;
-			 printf("Mi probabilidad en casa %f\n", ph_double);
-			 printf("Probabilidad de equipo contrario on the road %f\n", qr_double);
-			 printf("Mi probabilidad on the road %f\n", pr_double);
-			 printf("Probabilidad de equipo contrario en casa %f\n", qh_double);
-			 printf("JUEGOS TOTALES %d\n", number_of_games);
+			//  printf("Mi probabilidad en casa %f\n", ph_double);
+			//  printf("Probabilidad de equipo contrario on the road %f\n", qr_double);
+			//  printf("Mi probabilidad on the road %f\n", pr_double);
+			//  printf("Probabilidad de equipo contrario en casa %f\n", qh_double);
+			//  printf("JUEGOS TOTALES %d\n", number_of_games);
 			 global_numberofgames = (int) calloc(number_of_games+1, sizeof(int));
 			defining_games_quantity = (number_of_games + 1) / 2;
-			printf("DEFIING GAMES QUANTITY = %d\n", defining_games_quantity );
+			//rintf("DEFIING GAMES QUANTITY = %d\n", defining_games_quantity );
 			for(k = 0; k < number_of_games; k++) global_numberofgames[k] = 0;
 			create_buttons_window();
 
