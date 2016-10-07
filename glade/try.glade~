@@ -65,12 +65,13 @@ vértice origen al resto de los vértices en un grafo con pesos
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Reemplazo de Equipos</property>
+                <property name="tooltip_text" translatable="yes">Permite determinar la estrategia óptima de reemplazo de equipos, de modo que maximice la ganancia.</property>
                 <signal name="clicked" handler="btn_algoritmo3_clicked_cb" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
+                <property name="pack_type">end</property>
                 <property name="position">2</property>
               </packing>
             </child>
@@ -98,7 +99,8 @@ contiene valores menores que el que contiene dicho nodo, y el subárbol derecho
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Series Deportivas</property>
+                <property name="tooltip_text" translatable="yes">Algoritmo que calcula la mayor probabilidad que tiene el equipo A de ganar dada una
+secuencia de juegos, considerando la ventaja de localía para cada partido. </property>
                 <property name="xalign">0.46000000834465027</property>
                 <signal name="clicked" handler="btn_algoritmo5_clicked_cb" swapped="no"/>
               </object>
