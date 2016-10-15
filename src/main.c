@@ -78,7 +78,7 @@ void btn_algoritmo3_clicked_cb(){
     system("./equipment_replace &");
 }
 void btn_algoritmo4_clicked_cb(){
-    system("./pending_program &");
+    system("./binary_tree &");
 }
 void btn_algoritmo5_clicked_cb(){
     system("./series_deportivas &");
