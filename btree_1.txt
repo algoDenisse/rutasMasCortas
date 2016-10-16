@@ -1,4 +1,4 @@
-Harrison|1
-Lennon|2
-McCartney|3
+Harrison|2.6
+Lennon|2.3
+McCartney|3.3
 Starr|4

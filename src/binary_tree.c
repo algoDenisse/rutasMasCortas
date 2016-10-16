@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
 #include <stdbool.h>
-
+#include <stdio.h>
+#include <stdlib.h>
 //Global variables
 GtkWidget *number_keys_entry, *warning_window;
 GtkFileChooser *file_chooser;
@@ -8,6 +9,12 @@ char string_buffer[25];
 
 int number_keys,charPos;
 bool f_manual = FALSE;
+
+//For keys we will need to arrays / keys can be strings or number_keys
+char **key_as_string;
+int  **key_as_int;
+//Array for weights
+double **weights;
 
 void buffer_char(char c){
 	string_buffer[charPos++] = c;
@@ -18,19 +25,41 @@ void clear_token_buffer(){
 	charPos = 0;
 }
 
+int getObjectsQuantity( gchar *pFilename){
+
+	int row_numb=0;
+	int in_ch;
+	FILE *pfile;
+	pfile = fopen(pFilename, "r");
+
+	while ((in_ch = getc(pfile)) != EOF){
+		if(in_ch == '\n'){
+			row_numb++;
+		}
+	}
+  //fclose(pFilename);
+
+	return row_numb;
+
+
+}
+
 void filechooser_btree_file_set_cb(){
   FILE *file;
   gchar *filename;
   int ind,in_char,i=0;
+  filename=gtk_file_chooser_get_filename (file_chooser);
 
-  char **matriz_datos_iniciales = calloc(2, 500*sizeof(char));
-  //allocate memory
-	for (i = 0; i < 2; ++i) {
+  number_keys =getObjectsQuantity(filename);
+  printf("Numero de lineas:%d\n", number_keys);
+
+
+  char **matriz_datos_iniciales = calloc(number_keys*2, 500*sizeof(char));
+	//alojamos la memoria para cada espacio del char
+	for (i = 0; i < number_keys*2; ++i) {
 		 matriz_datos_iniciales[i] = (char *)malloc(500);
 	}
 
-
-  filename=gtk_file_chooser_get_filename (file_chooser);
   file = fopen( filename, "r" );
 
   if(file){
@@ -38,7 +67,8 @@ void filechooser_btree_file_set_cb(){
     while ((in_char = getc(file)) != EOF){
 
       if((in_char == '|')|| (in_char == '\n')){
-        strcpy(matriz_datos_iniciales[ind], string_buffer);
+        //printf("Elemento:%s\n",string_buffer );
+        strcpy(matriz_datos_iniciales[ind],string_buffer);
         clear_token_buffer();
         ind++;
       }
@@ -52,6 +82,51 @@ void filechooser_btree_file_set_cb(){
   else{
       printf("%s\n","Error al abrir el archivo" );
     }
+  //Separate values in two arrays / one for weights and other for keys
+
+  //Change: just allocate when needed
+
+  key_as_string = calloc(number_keys, 500*sizeof(char));
+	//alojamos la memoria para cada espacio del char
+	for (i = 0; i < number_keys; ++i) {
+		 key_as_string[i] = (char *)malloc(500);
+	}
+
+
+  weights = calloc(number_keys, 500*sizeof(int));
+	//alojamos la memoria para cada espacio del char
+	for (i = 0; i < number_keys; ++i) {
+		 weights[i] = (int *)malloc(500);
+	}
+
+  for(i = 0;i<number_keys*2;i++){
+    int k,w = 0;
+    //printf("With %d the result is %d\n",i,reminder );
+    if(i % 2  == 0){
+
+      //function to see type of keys
+      strcpy(key_as_string[k],matriz_datos_iniciales[i]);
+      k++;
+    }
+    else{
+      printf("Peso:%s\n",matriz_datos_iniciales[i]);
+      char *ptr;
+      double ret;
+      ret = strtod(matriz_datos_iniciales[i], &ptr);
+      printf("The number(double) is %lf\n", ret);
+      //weights[w]=ret;
+      //w++;
+    }
+
+  }
+  int k,w=0;
+  for(k=0;k<number_keys;k++){
+    printf("Key:%s\n",key_as_string[k]);
+  }
+
+  //for(w=0;w<number_keys;w++){
+    //printf("Peso:%d\n",weights[w]);
+  //}
 
 
 }
