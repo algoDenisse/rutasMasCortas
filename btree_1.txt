@@ -1,4 +1,5 @@
-Harrison|2,6654
-Lennon|2,3
-McCartney|3,3
-Starr|4
+Praga|2013
+New York|8504
+San Jose|3100
+Paris|2125
+Atenas|6617

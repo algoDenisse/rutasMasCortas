@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 //Global variables
 GtkWidget *number_keys_entry, *warning_window;
 GtkFileChooser *file_chooser;
@@ -12,9 +13,11 @@ bool f_manual = FALSE;
 
 //For keys we will need to arrays / keys can be strings or number_keys
 char **key_as_string;
+char **sorted_key_as_string;
 
 //Array for weights
 float *weights;
+float *probabilities;
 
 GtkBuilder      *initial_BTREE_table_builder;
 GtkWidget       *initial_BTREE_table_window;
@@ -28,6 +31,65 @@ void buffer_char(char c){
 void clear_token_buffer(){
 	memset(string_buffer, 0, 25);
 	charPos = 0;
+}
+//Changes added by Treicy
+void sort_keys()
+{
+    int i, j;
+    char temp[70];
+		float temp_weight;
+
+    for(i=0; i<number_keys-1; ++i){
+        for(j=i+1; j<number_keys; ++j)
+        {
+
+            if(strcmp(key_as_string[i], key_as_string[j])>0)
+            {
+                strcpy(temp, key_as_string[i]);
+								temp_weight = weights[i];
+                strcpy(key_as_string[i], key_as_string[j]);
+								weights[i] = weights[j];
+                strcpy(key_as_string[j], temp);
+								weights[j] = temp_weight;
+            }
+        }
+			}
+			for(i=0;i<number_keys;i++){
+		    printf("Sorted Key:%s\n",key_as_string[i]);
+		  }
+
+			for(i=0;i<number_keys;i++){
+		    printf("Sorted Peso:%lf\n",weights[i]);
+		  }
+
+
+
+
+
+
+}
+//the function gets the probabilities and stores them in the array
+void getProbabilities(){
+	float sum_weights= 0;
+	int ind;
+	for(ind = 0;ind < number_keys ; ind++){
+		sum_weights+=weights[ind];
+	}
+	printf("The sum of the weights is:%lf\n",sum_weights);
+
+	probabilities = calloc(number_keys, 500*sizeof(float));
+
+	for(ind = 0;ind < number_keys ; ind++){
+		probabilities[ind] = weights[ind]/sum_weights;
+
+	}
+
+}
+
+void solve_BTREE_problem(){
+	printf("%s\n","Estoy en Procesar");
+	sort_keys();
+	getProbabilities();
 }
 
 int getObjectsQuantity( gchar *pFilename){
@@ -50,7 +112,7 @@ int getObjectsQuantity( gchar *pFilename){
 }
 //it fills initial table with values in the file
 void update_initial_table(int pKey_number){
-	printf("%s\n","1. Estoy llenando la tabla inicial" );
+	//printf("%s\n","1. Estoy llenando la tabla inicial" );
   GtkWidget  *pt_entrada;
   pt_entrada = gtk_entry_new();
   char pt_cell_value[25];
@@ -61,7 +123,7 @@ void update_initial_table(int pKey_number){
     for (j = 0; j<2; j++){
 			pt_entrada = gtk_grid_get_child_at (initial_BTREE_table, j, i);
       if (j == 0){
-				printf("Escribire: %s\n",key_as_string[i-1]);
+				//printf("Escribire: %s\n",key_as_string[i-1]);
 				gtk_entry_set_text (pt_entrada, key_as_string[i-1]);
 			}
 			else{
@@ -121,7 +183,7 @@ void create_entry_window(){
 	gtk_grid_attach (GTK_GRID (initial_BTREE_table),button_box ,0.5, j, 2, 2);
 
 	button = gtk_button_new_with_label ("Procesar");
-	//g_signal_connect (button, "clicked", G_CALLBACK (solve_knapsack_problem), (gpointer) initial_table);
+	g_signal_connect (button, "clicked", G_CALLBACK (solve_BTREE_problem), (gpointer) initial_BTREE_table);
 	gtk_container_add (GTK_CONTAINER (button_box), button);
 
 	g_object_unref(initial_BTREE_table_builder);
@@ -136,7 +198,7 @@ void filechooser_btree_file_set_cb(){
   filename=gtk_file_chooser_get_filename (file_chooser);
 
   number_keys =getObjectsQuantity(filename);
-  printf("Numero de lineas:%d\n", number_keys);
+  //printf("Numero de lineas:%d\n", number_keys);
 
 
   char **matriz_datos_iniciales = calloc(number_keys*2, 500*sizeof(char));
@@ -169,8 +231,6 @@ void filechooser_btree_file_set_cb(){
     }
   //Separate values in two arrays / one for weights and other for keys
 
-  //Change: just allocate when needed
-
   key_as_string = calloc(number_keys, 500*sizeof(char));
 	//alojamos la memoria para cada espacio del char
 	for (i = 0; i < number_keys; ++i) {
@@ -196,7 +256,7 @@ void filechooser_btree_file_set_cb(){
       //char *ptr;
       float ret;
 			ret = strtof(matriz_datos_iniciales[i],NULL);
-      printf("The number(float) is %lf\n", ret);
+      //printf("The number(float) is %lf\n", ret);
       weights[w]=ret;
       w++;
 
