@@ -14,7 +14,12 @@ bool f_manual = FALSE;
 char **key_as_string;
 int  **key_as_int;
 //Array for weights
-double **weights;
+float *weights;
+
+GtkBuilder      *initial_BTREE_table_builder;
+GtkWidget       *initial_BTREE_table_window;
+GtkWidget       *initial_BTREE_table;
+GtkWidget ***entrada;
 
 void buffer_char(char c){
 	string_buffer[charPos++] = c;
@@ -42,6 +47,86 @@ int getObjectsQuantity( gchar *pFilename){
 	return row_numb;
 
 
+}
+//it fills initial table with values in the file
+void update_initial_table(int pKey_number){
+	printf("%s\n","1. Estoy llenando la tabla inicial" );
+  GtkWidget  *pt_entrada;
+  pt_entrada = gtk_entry_new();
+  char pt_cell_value[25];
+  // modificar entrada de la P table
+  int i, j;
+	int w = 0;
+  for(i = 1; i < pKey_number+1 ; i ++){
+    for (j = 0; j<2; j++){
+			pt_entrada = gtk_grid_get_child_at (initial_BTREE_table, j, i);
+      if (j == 0){
+				printf("Escribire: %s\n",key_as_string[i-1]);
+				gtk_entry_set_text (pt_entrada, key_as_string[i-1]);
+			}
+			else{
+				snprintf(pt_cell_value,10,"%lf",weights[i-1]);
+				printf("%s\n",pt_cell_value );
+				gtk_entry_set_text (pt_entrada, pt_cell_value );
+
+			}
+
+    }// end j FOR
+  }//end i FOR
+
+}
+
+
+//Manual entry of weights and keys
+void create_entry_window(){
+	int k,j;
+	GtkWidget       *button;
+	GtkWidget       *button_box;
+	initial_BTREE_table_builder= gtk_builder_new();
+	gtk_builder_add_from_file (initial_BTREE_table_builder, "glade/initial_entry_win_BTREE.glade", NULL);
+
+	initial_BTREE_table_window = GTK_WIDGET(gtk_builder_get_object(initial_BTREE_table_builder, "btree_entry_window"));
+	gtk_builder_connect_signals(initial_BTREE_table_builder, NULL);
+
+	initial_BTREE_table= gtk_grid_new();
+	gtk_grid_set_row_spacing (GTK_GRID (initial_BTREE_table), 2);
+	gtk_container_add (GTK_CONTAINER (initial_BTREE_table_window), initial_BTREE_table);
+
+	//dynamic grid
+	entrada=calloc(number_keys+1,sizeof(GtkWidget**));
+	for(j = 0; j < number_keys+1; j++){
+		entrada[j]=calloc(number_keys+1,sizeof(GtkWidget*));
+	}
+
+	//loops to create grid
+	for(j=0;j<number_keys+1;j++){ //filas
+		for(k =0; k< 2;k++){ //columnas
+			entrada[j][k]= gtk_entry_new();
+			gtk_grid_attach (GTK_GRID (initial_BTREE_table),entrada[j][k] , k, j, 1, 1);
+			//printf("Puse la pos[%d][%d]\n",j,k );
+
+		}
+	}
+
+	gtk_entry_set_text (entrada[0][0],"Llave");
+	gtk_widget_set_sensitive (entrada[0][0], FALSE);
+	gtk_widget_set_name(entrada[0][0], "column_name");
+
+	gtk_entry_set_text (entrada[0][1],"Peso");
+	gtk_widget_set_sensitive (entrada[0][1], FALSE);
+	gtk_widget_set_name(entrada[0][1], "column_name");
+
+
+	button_box = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
+	gtk_grid_attach (GTK_GRID (initial_BTREE_table),button_box ,0.5, j, 2, 2);
+
+	button = gtk_button_new_with_label ("Procesar");
+	//g_signal_connect (button, "clicked", G_CALLBACK (solve_knapsack_problem), (gpointer) initial_table);
+	gtk_container_add (GTK_CONTAINER (button_box), button);
+
+	g_object_unref(initial_BTREE_table_builder);
+
+	gtk_widget_show_all(initial_BTREE_table_window);
 }
 
 void filechooser_btree_file_set_cb(){
@@ -93,14 +178,12 @@ void filechooser_btree_file_set_cb(){
 	}
 
 
-  weights = calloc(number_keys, 500*sizeof(int));
-	//alojamos la memoria para cada espacio del char
-	for (i = 0; i < number_keys; ++i) {
-		 weights[i] = (int *)malloc(500);
-	}
+  weights = calloc(number_keys, 500*sizeof(float));
+	//alojamos la memoria para cada espacio
 
+  int k,w = 0;
   for(i = 0;i<number_keys*2;i++){
-    int k,w = 0;
+
     //printf("With %d the result is %d\n",i,reminder );
     if(i % 2  == 0){
 
@@ -110,25 +193,27 @@ void filechooser_btree_file_set_cb(){
     }
     else{
       printf("Peso:%s\n",matriz_datos_iniciales[i]);
-      char *ptr;
-      double ret;
-      ret = strtod(matriz_datos_iniciales[i], &ptr);
-      printf("The number(double) is %lf\n", ret);
-      //weights[w]=ret;
-      //w++;
+      //char *ptr;
+      float ret;
+			ret = strtof(matriz_datos_iniciales[i],NULL);
+      printf("The number(float) is %lf\n", ret);
+      weights[w]=ret;
+      w++;
+
     }
 
   }
-  int k,w=0;
+
   for(k=0;k<number_keys;k++){
     printf("Key:%s\n",key_as_string[k]);
   }
 
-  //for(w=0;w<number_keys;w++){
-    //printf("Peso:%d\n",weights[w]);
-  //}
+  for(w=0;w<number_keys;w++){
+    printf("Peso:%lf\n",weights[w]);
+  }
 
-
+  create_entry_window();
+	update_initial_table(number_keys);
 }
 
 bool is_number(gchar* pvalue){
@@ -177,6 +262,7 @@ void on_ok_key_button_clicked(){
     number_keys=atoi(gtk_entry_get_text (number_keys_entry));
     printf("El valor digitado es:%d\n",number_keys);
     f_manual = TRUE;
+		create_entry_window();
   }
 
 
