@@ -1,4 +1,4 @@
-Harrison|2,6654
-Lennon|2,3
-McCartney|3,3
-Starr|4
+Harrison|0.18
+Lennon|0.32
+McCartney|0.39
+Starr|0.11

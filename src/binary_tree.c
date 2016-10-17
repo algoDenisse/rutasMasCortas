@@ -15,6 +15,8 @@ char **key_as_string;
 int  **key_as_int;
 //Array for weights
 float *weights;
+double **matriz_solution;
+float *probabilities;
 
 GtkBuilder      *initial_BTREE_table_builder;
 GtkWidget       *initial_BTREE_table_window;
@@ -61,11 +63,11 @@ void update_initial_table(int pKey_number){
     for (j = 0; j<2; j++){
 			pt_entrada = gtk_grid_get_child_at (initial_BTREE_table, j, i);
       if (j == 0){
-				printf("Escribire: %s\n",key_as_string[i-1]);
+				//printf("Escribire: %s\n",key_as_string[i-1]);
 				gtk_entry_set_text (pt_entrada, key_as_string[i-1]);
 			}
 			else{
-				snprintf(pt_cell_value,10,"%lf",weights[i-1]);
+				snprintf(pt_cell_value,10,"%.4f",weights[i-1]);
 				printf("%s\n",pt_cell_value );
 				gtk_entry_set_text (pt_entrada, pt_cell_value );
 
@@ -74,6 +76,115 @@ void update_initial_table(int pKey_number){
     }// end j FOR
   }//end i FOR
 
+}
+
+void printSolution(double **dist)
+{
+    int i,j;
+    for (i = 0; i < number_keys+1; i++)
+    {
+        for ( j = 0; j < number_keys+1; j++)
+        {
+            printf ("%10.4f", dist[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void sort_keys()
+{
+    int i, j;
+    char temp[70];
+  float temp_weight;
+
+    for(i=0; i<number_keys-1; ++i){
+        for(j=i+1; j<number_keys; ++j)
+        {
+
+            if(strcmp(key_as_string[i], key_as_string[j])>0)
+            {
+                strcpy(temp, key_as_string[i]);
+        temp_weight = weights[i];
+                strcpy(key_as_string[i], key_as_string[j]);
+        weights[i] = weights[j];
+                strcpy(key_as_string[j], temp);
+        weights[j] = temp_weight;
+            }
+        }
+   }
+   for(i=0;i<number_keys;i++){
+      printf("Sorted Key:%s\n",key_as_string[i]);
+    }
+
+   for(i=0;i<number_keys;i++){
+      printf("Sorted Peso:%lf\n",weights[i]);
+    }
+
+
+
+
+
+
+}
+//the function gets the probabilities and stores them in the array
+void getProbabilities(){
+ float sum_weights= 0;
+ int ind;
+ for(ind = 0;ind < number_keys ; ind++){
+  sum_weights+=weights[ind];
+ }
+ printf("The sum of the weights is:%lf\n",sum_weights);
+
+ probabilities = calloc(number_keys, 500*sizeof(float));
+
+ for(ind = 0;ind < number_keys ; ind++){
+  probabilities[ind] = weights[ind]/sum_weights;
+
+ }
+
+}
+
+
+void create_solution_matrix(){
+		//printf("%s\n", "HOLA");
+		int i, j = 0;
+
+		for(i = 0; i< number_keys; i ++) printf("probabilities[%d] = %.4f\n", i, probabilities[i] );
+
+		matriz_solution = calloc(number_keys+1, 1+sizeof(double*));
+		for (i = 0; i < number_keys+1; ++i) {
+			 matriz_solution[i] = calloc(number_keys+1,sizeof(double));
+		}
+		for (i = 0; i < number_keys+1; i++){
+			for ( j = 0; j < number_keys+1; j++){
+				if(i < j){
+					printf("m[%d][%d] = %d\n", i, j, probabilities[i-1] );
+					matriz_solution[i][i+1] = probabilities[i] ;
+				}
+				else if(i ==  j ){
+					matriz_solution[i][j] = 0;
+				}
+				else{
+					matriz_solution[i][j] = 1;
+				}
+			}
+		}
+
+
+}
+
+void solve_BTREE_problem(){
+	GtkWidget  *entrada;
+  entrada = gtk_entry_new();
+  gchar* entrance;
+  entrance = calloc(1, 500*sizeof(gchar));
+	if(f_manual){
+		//llenar las matrices con los datos de entrada
+	}
+	sort_keys();
+	getProbabilities();
+	create_solution_matrix();
+	printSolution(matriz_solution);
 }
 
 
@@ -121,7 +232,7 @@ void create_entry_window(){
 	gtk_grid_attach (GTK_GRID (initial_BTREE_table),button_box ,0.5, j, 2, 2);
 
 	button = gtk_button_new_with_label ("Procesar");
-	//g_signal_connect (button, "clicked", G_CALLBACK (solve_knapsack_problem), (gpointer) initial_table);
+	g_signal_connect (button, "clicked", G_CALLBACK (solve_BTREE_problem), (gpointer) initial_BTREE_table);
 	gtk_container_add (GTK_CONTAINER (button_box), button);
 
 	g_object_unref(initial_BTREE_table_builder);
@@ -136,7 +247,7 @@ void filechooser_btree_file_set_cb(){
   filename=gtk_file_chooser_get_filename (file_chooser);
 
   number_keys =getObjectsQuantity(filename);
-  printf("Numero de lineas:%d\n", number_keys);
+//  printf("Numero de lineas:%d\n", number_keys);
 
 
   char **matriz_datos_iniciales = calloc(number_keys*2, 500*sizeof(char));
@@ -192,11 +303,11 @@ void filechooser_btree_file_set_cb(){
       k++;
     }
     else{
-      printf("Peso:%s\n",matriz_datos_iniciales[i]);
+    //  printf("Peso PRIMERO:%s\n",matriz_datos_iniciales[i]);
       //char *ptr;
       float ret;
 			ret = strtof(matriz_datos_iniciales[i],NULL);
-      printf("The number(float) is %lf\n", ret);
+    //  printf("The number(float) is %.4f\n", ret);
       weights[w]=ret;
       w++;
 
@@ -205,11 +316,11 @@ void filechooser_btree_file_set_cb(){
   }
 
   for(k=0;k<number_keys;k++){
-    printf("Key:%s\n",key_as_string[k]);
+   printf("Key:%s\n",key_as_string[k]);
   }
 
   for(w=0;w<number_keys;w++){
-    printf("Peso:%lf\n",weights[w]);
+  printf("Peso:%lf\n",weights[w]);
   }
 
   create_entry_window();

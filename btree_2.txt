@@ -1,0 +1,5 @@
+Praga|2013
+New York|8504
+San Jose|3100
+Paris|2125
+Atenas|6617
