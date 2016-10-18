@@ -144,11 +144,29 @@ void getProbabilities(){
 
 }
 
+double  array_min(double *mid_matrix){
+  double minimum = mid_matrix[0];
+  int c;
+  int location;
+    for ( c = 1 ; c < number_keys+1 ; c++ )
+    {
+        if ( mid_matrix[c] < minimum )
+        {
+
+           minimum = mid_matrix[c];
+
+
+        }
+    }
+		printf("Minimo:%.2f\n", minimum);
+    return minimum;
+}
 double find_min(double **dist, int i, int j){
 	//printf("Vamos a encontrar el minimo, pero primero una prueba\n");
 	int a,k;
 	double sum_probabilidades =0.0000;
 	double *mid_matrix;// Almacenaremos todos los resultados para escoger el menor
+	double min;
 	mid_matrix = calloc(number_keys+1, 1+sizeof(double));
 	for(k = 0; k <number_keys+1; k++) mid_matrix[k] = 99999.9999; // lo llenamos con un numero lo suficientemente grande;
 
@@ -159,19 +177,20 @@ double find_min(double **dist, int i, int j){
 		printf("probabilities[%d]= %.4f\n",a,probabilities[a-1] );
 	}
 	printf("Suma de probabilidades desde key %d hasta key %d = %.4f\n",i+1, j , sum_probabilidades );
-	//
-	// for(k= i; k <= j; k++){
-	// 	mid_matrix[k] = matriz_solution[i][k-1] + matriz_solution[k+1][j] + sum_probabilidades;
-	// }
-	// printf("Mid Matrix\n");
-	// for(k = 0; k <number_keys+1; k++) printf("[%.4f] , ",mid_matrix[k] );
-	// printf("\n");
+
+	for(k= i+1; k <= j; k++){
+		printf("matriz_solution[%d][%d] = %.4f, matriz_solution[%d][%d] = %.4f \n", i, k-1, matriz_solution[i][k-1], k, j, matriz_solution[k][j]  );
+		mid_matrix[k] = matriz_solution[i][k-1] + matriz_solution[k][j] + sum_probabilidades;
+	}
+	printf("Mid Matrix\n");
+	for(k = 0; k <number_keys+1; k++) printf("[%.4f] , ",mid_matrix[k] );
+	printf("\n");
 
 
 
 	//printSolution(dist);
 	printf("-------------------------------------------------------------\n");
-	return 0.1234;
+	return 	array_min(mid_matrix);
 }
 
 void create_solution_matrix(){
