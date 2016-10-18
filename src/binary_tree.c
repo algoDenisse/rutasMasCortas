@@ -144,6 +144,35 @@ void getProbabilities(){
 
 }
 
+double find_min(double **dist, int i, int j){
+	//printf("Vamos a encontrar el minimo, pero primero una prueba\n");
+	int a,k;
+	double sum_probabilidades =0.0000;
+	double *mid_matrix;// Almacenaremos todos los resultados para escoger el menor
+	mid_matrix = calloc(number_keys+1, 1+sizeof(double));
+	for(k = 0; k <number_keys+1; k++) mid_matrix[k] = 99999.9999; // lo llenamos con un numero lo suficientemente grande;
+
+
+
+	for(a = i+1; a <= j; a++) {
+		sum_probabilidades += probabilities[a-1];
+		printf("probabilities[%d]= %.4f\n",a,probabilities[a-1] );
+	}
+	printf("Suma de probabilidades desde key %d hasta key %d = %.4f\n",i+1, j , sum_probabilidades );
+	//
+	// for(k= i; k <= j; k++){
+	// 	mid_matrix[k] = matriz_solution[i][k-1] + matriz_solution[k+1][j] + sum_probabilidades;
+	// }
+	// printf("Mid Matrix\n");
+	// for(k = 0; k <number_keys+1; k++) printf("[%.4f] , ",mid_matrix[k] );
+	// printf("\n");
+
+
+
+	//printSolution(dist);
+	printf("-------------------------------------------------------------\n");
+	return 0.1234;
+}
 
 void create_solution_matrix(){
 		//printf("%s\n", "HOLA");
@@ -157,8 +186,8 @@ void create_solution_matrix(){
 		}
 		for (i = 0; i < number_keys+1; i++){
 			for ( j = 0; j < number_keys+1; j++){
-				if(i < j){
-					printf("m[%d][%d] = %d\n", i, j, probabilities[i-1] );
+				if(i == j-1){
+					printf("m[%d][%d] = %.4f\n", i, j, probabilities[i] );
 					matriz_solution[i][i+1] = probabilities[i] ;
 				}
 				else if(i ==  j ){
@@ -169,6 +198,44 @@ void create_solution_matrix(){
 				}
 			}
 		}
+
+// for (i = 0; i < number_keys+1; i++){
+// 			for ( j = 0; j < number_keys+1; j++){
+// 			 if((i < j)&&(i != j-1)){
+// 			// if((i < j)&&(j == i+2)){
+// 			 	//
+//
+// 			printf("matriz_solution[%d][%d]\n", i, j );
+//
+//
+// 		 	//	}
+// 			}
+// 		}
+// 	}
+
+	i = 0;
+	j = 2;
+	int last_j = 2;
+	bool siga = TRUE;
+	while(siga){
+		printf("[%d][%d]\n", i, j );
+		matriz_solution[i][j] = find_min(matriz_solution, i, j);
+		//
+		//if(j < number_keys +1){
+			i ++;
+			j ++;
+
+		if (j == 5){ //reinicializo
+			i = 0;
+			last_j ++;
+			j = last_j;
+		}
+		if( (i == 0)&&(j == number_keys)){
+			printf("[%d][%d]\n", i, j );
+			matriz_solution[i][j] = find_min(matriz_solution, i, j);
+				siga = FALSE;
+			}
+	}
 
 
 }
