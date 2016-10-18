@@ -7,7 +7,7 @@ GtkWidget *number_keys_entry, *warning_window;
 GtkFileChooser *file_chooser;
 char string_buffer[25];
 
-int number_keys,charPos;
+int number_keys,charPos, winnerK= 0;
 bool f_manual = FALSE;
 
 //For keys we will need to arrays / keys can be strings or number_keys
@@ -16,6 +16,7 @@ int  **key_as_int;
 //Array for weights
 float *weights;
 double **matriz_solution;
+int **r_table_mtx;
 float *probabilities;
 
 GtkBuilder      *initial_BTREE_table_builder;
@@ -86,6 +87,19 @@ void printSolution(double **dist)
         for ( j = 0; j < number_keys+1; j++)
         {
             printf ("%10.4f", dist[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void printSolution_int(int **dist)
+{
+    int i,j;
+    for (i = 0; i < number_keys+1; i++)
+    {
+        for ( j = 0; j < number_keys+1; j++)
+        {
+            printf ("%10d", dist[i][j]);
         }
         printf("\n");
     }
@@ -174,23 +188,28 @@ double find_min(double **dist, int i, int j){
 
 	for(a = i+1; a <= j; a++) {
 		sum_probabilidades += probabilities[a-1];
-		printf("probabilities[%d]= %.4f\n",a,probabilities[a-1] );
+		//printf("probabilities[%d]= %.4f\n",a,probabilities[a-1] );
 	}
 	printf("Suma de probabilidades desde key %d hasta key %d = %.4f\n",i+1, j , sum_probabilidades );
 
 	for(k= i+1; k <= j; k++){
-		printf("matriz_solution[%d][%d] = %.4f, matriz_solution[%d][%d] = %.4f \n", i, k-1, matriz_solution[i][k-1], k, j, matriz_solution[k][j]  );
+	//printf("matriz_solution[%d][%d] = %.4f, matriz_solution[%d][%d] = %.4f \n", i, k-1, matriz_solution[i][k-1], k, j, matriz_solution[k][j]  );
 		mid_matrix[k] = matriz_solution[i][k-1] + matriz_solution[k][j] + sum_probabilidades;
 	}
 	printf("Mid Matrix\n");
 	for(k = 0; k <number_keys+1; k++) printf("[%.4f] , ",mid_matrix[k] );
 	printf("\n");
-
-
-
 	//printSolution(dist);
 	printf("-------------------------------------------------------------\n");
-	return 	array_min(mid_matrix);
+
+	min = array_min(mid_matrix);
+
+	for(k = 0; k <number_keys+1; k++) if(min == mid_matrix[k] ) winnerK = k;
+	printf("K GANADOR = %d\n", winnerK);
+	//actualizamos tabla R con winner k
+	r_table_mtx[i][j] = winnerK;
+
+	return min;
 }
 
 void create_solution_matrix(){
@@ -200,14 +219,22 @@ void create_solution_matrix(){
 		for(i = 0; i< number_keys; i ++) printf("probabilities[%d] = %.4f\n", i, probabilities[i] );
 
 		matriz_solution = calloc(number_keys+1, 1+sizeof(double*));
+		r_table_mtx = calloc(number_keys+1, 1+sizeof(int*));
 		for (i = 0; i < number_keys+1; ++i) {
 			 matriz_solution[i] = calloc(number_keys+1,sizeof(double));
+			 r_table_mtx[i] = calloc(number_keys+1,sizeof(int));
+		}
+		for (i = 0; i<number_keys+1 ; i++){
+			for(j = 0; j<number_keys+1; j++ ){
+				r_table_mtx[i][j] = 0;
+			}
 		}
 		for (i = 0; i < number_keys+1; i++){
 			for ( j = 0; j < number_keys+1; j++){
 				if(i == j-1){
 					printf("m[%d][%d] = %.4f\n", i, j, probabilities[i] );
 					matriz_solution[i][i+1] = probabilities[i] ;
+					r_table_mtx[i][i+1] = j;
 				}
 				else if(i ==  j ){
 					matriz_solution[i][j] = 0;
@@ -218,20 +245,6 @@ void create_solution_matrix(){
 			}
 		}
 
-// for (i = 0; i < number_keys+1; i++){
-// 			for ( j = 0; j < number_keys+1; j++){
-// 			 if((i < j)&&(i != j-1)){
-// 			// if((i < j)&&(j == i+2)){
-// 			 	//
-//
-// 			printf("matriz_solution[%d][%d]\n", i, j );
-//
-//
-// 		 	//	}
-// 			}
-// 		}
-// 	}
-
 	i = 0;
 	j = 2;
 	int last_j = 2;
@@ -239,11 +252,8 @@ void create_solution_matrix(){
 	while(siga){
 		printf("[%d][%d]\n", i, j );
 		matriz_solution[i][j] = find_min(matriz_solution, i, j);
-		//
-		//if(j < number_keys +1){
 			i ++;
 			j ++;
-
 		if (j == 5){ //reinicializo
 			i = 0;
 			last_j ++;
@@ -255,7 +265,6 @@ void create_solution_matrix(){
 				siga = FALSE;
 			}
 	}
-
 
 }
 
@@ -271,6 +280,8 @@ void solve_BTREE_problem(){
 	getProbabilities();
 	create_solution_matrix();
 	printSolution(matriz_solution);
+	printf("--------------R TABLE SOLUTION--------------\n");
+	printSolution_int(r_table_mtx);
 }
 
 
