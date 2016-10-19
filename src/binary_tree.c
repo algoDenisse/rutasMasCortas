@@ -172,7 +172,7 @@ double  array_min(double *mid_matrix){
 
         }
     }
-		printf("Minimo:%.2f\n", minimum);
+	//	printf("Minimo:%.2f\n", minimum);
     return minimum;
 }
 double find_min(double **dist, int i, int j){
@@ -190,25 +190,25 @@ double find_min(double **dist, int i, int j){
 		sum_probabilidades += probabilities[a-1];
 		//printf("probabilities[%d]= %.4f\n",a,probabilities[a-1] );
 	}
-	printf("Suma de probabilidades desde key %d hasta key %d = %.4f\n",i+1, j , sum_probabilidades );
+	//printf("Suma de probabilidades desde key %d hasta key %d = %.4f\n",i+1, j , sum_probabilidades );
 
 	for(k= i+1; k <= j; k++){
 	//printf("matriz_solution[%d][%d] = %.4f, matriz_solution[%d][%d] = %.4f \n", i, k-1, matriz_solution[i][k-1], k, j, matriz_solution[k][j]  );
 		mid_matrix[k] = matriz_solution[i][k-1] + matriz_solution[k][j] + sum_probabilidades;
 	}
-	printf("Mid Matrix\n");
-	for(k = 0; k <number_keys+1; k++) printf("[%.4f] , ",mid_matrix[k] );
-	printf("\n");
+	// printf("Mid Matrix\n");
+	// for(k = 0; k <number_keys+1; k++) printf("[%.4f] , ",mid_matrix[k] );
+	// printf("\n");
 	//printSolution(dist);
-	printf("-------------------------------------------------------------\n");
+
 
 	min = array_min(mid_matrix);
 
 	for(k = 0; k <number_keys+1; k++) if(min == mid_matrix[k] ) winnerK = k;
-	printf("K GANADOR = %d\n", winnerK);
+	//printf("K GANADOR = %d\n", winnerK);
 	//actualizamos tabla R con winner k
 	r_table_mtx[i][j] = winnerK;
-
+//	printf("-------------------------------------------------------------\n");
 	return min;
 }
 
@@ -395,7 +395,7 @@ void create_solution_matrix(){
 		matriz_solution[i][j] = find_min(matriz_solution, i, j);
 			i ++;
 			j ++;
-		if (j == 5){ //reinicializo
+		if (j == number_keys+1){ //reinicializo
 			i = 0;
 			last_j ++;
 			j = last_j;
