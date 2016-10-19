@@ -212,6 +212,147 @@ double find_min(double **dist, int i, int j){
 	return min;
 }
 
+void 	create_table_A(){
+	printf("TRATO DE ABRIR LA VENTANA\n" );
+	GtkBuilder      *btree_solution_window_builder;
+	GtkWidget       *btree_solution_table_window;
+	GtkWidget       *btree_solution_table_scrolledwindow;
+	GtkWidget				*btree_solution_grid;
+
+	char buff[25];
+	btree_solution_window_builder =  gtk_builder_new();
+	gtk_builder_add_from_file (btree_solution_window_builder, "glade/btree_solution_window.glade", NULL);
+
+	btree_solution_table_window = GTK_WIDGET(gtk_builder_get_object(btree_solution_window_builder, "btree_solution_window"));
+  gtk_builder_connect_signals(btree_solution_window_builder, NULL);
+	gtk_window_set_title (GTK_WINDOW (btree_solution_table_window), "Tabla A");
+
+	btree_solution_table_scrolledwindow = GTK_WIDGET(gtk_builder_get_object(btree_solution_window_builder, "btree_solution_scrolledwindow"));
+	gtk_builder_connect_signals(btree_solution_window_builder, NULL);
+
+	btree_solution_grid = gtk_grid_new();
+  gtk_grid_set_row_spacing (GTK_GRID (btree_solution_grid), 2);
+  gtk_container_add (GTK_CONTAINER (btree_solution_table_scrolledwindow), btree_solution_grid);
+
+	GtkWidget ***entrada;
+	int j,k,i;
+  entrada=calloc(number_keys+2,sizeof(GtkWidget**));
+  for(j = 0; j < number_keys+2; j++){
+    entrada[j]=calloc(number_keys+2,sizeof(GtkWidget*));
+  }
+
+	for(k =0; k< number_keys+2;k++){
+    for(j=0;j<number_keys+2;j++){
+
+      entrada[k][j]= gtk_entry_new();
+      gtk_grid_attach (GTK_GRID (btree_solution_grid),entrada[k][j] , k, j, 1, 1);
+			gtk_widget_set_sensitive (entrada[k][j], FALSE);
+			if(k == 0 && j == 0) {
+				gtk_widget_set_name(entrada[k][j], "column_name_A");
+			}
+			if(k== 0 && j !=0){
+			snprintf(buff,25,"%d",j);
+			gtk_entry_set_text (entrada[k][j],buff);
+			gtk_widget_set_name(entrada[k][j], "column_name_A");
+			}
+			else if(k!= 0 && j ==0){
+			snprintf(buff,25,"%d",k-1);
+			gtk_entry_set_text (entrada[k][j],buff);
+			gtk_widget_set_name(entrada[k][j], "column_name_A");
+			}
+			else if(k !=0 && j!= 0){
+				gtk_widget_set_name(entrada[k][j], "field_A");
+				if ( k > j || k == j){
+
+					if((j-1== 0)&& (k-1 == number_keys)){
+						gtk_widget_set_name(entrada[k][j],"new_val_A");
+					}
+					snprintf(buff,25,"%.4f",matriz_solution[j-1][k-1]);
+					gtk_entry_set_text (entrada[k][j],buff);
+
+				}
+
+			}
+
+    }
+  }
+
+
+	g_object_unref(btree_solution_window_builder);
+
+	gtk_widget_show_all(btree_solution_table_window);
+}
+
+void 	create_table_R(){
+	printf("Table RRRRR\n" );
+	GtkBuilder      *btree_solution_window_builder;
+	GtkWidget       *btree_solution_table_window;
+	GtkWidget       *btree_solution_table_scrolledwindow;
+	GtkWidget				*btree_solution_grid;
+
+	char buff[25];
+	btree_solution_window_builder =  gtk_builder_new();
+	gtk_builder_add_from_file (btree_solution_window_builder, "glade/btree_rSolution_window.glade", NULL);
+
+	btree_solution_table_window = GTK_WIDGET(gtk_builder_get_object(btree_solution_window_builder, "btree_rSolution_window"));
+  gtk_builder_connect_signals(btree_solution_window_builder, NULL);
+	gtk_window_set_title (GTK_WINDOW (btree_solution_table_window), "Tabla R");
+
+	btree_solution_table_scrolledwindow = GTK_WIDGET(gtk_builder_get_object(btree_solution_window_builder, "btree_rSolution_scrolledwindow"));
+	gtk_builder_connect_signals(btree_solution_window_builder, NULL);
+
+	btree_solution_grid = gtk_grid_new();
+  gtk_grid_set_row_spacing (GTK_GRID (btree_solution_grid), 2);
+  gtk_container_add (GTK_CONTAINER (btree_solution_table_scrolledwindow), btree_solution_grid);
+
+	GtkWidget ***entrada;
+	int j,k,i;
+  entrada=calloc(number_keys+2,sizeof(GtkWidget**));
+  for(j = 0; j < number_keys+2; j++){
+    entrada[j]=calloc(number_keys+2,sizeof(GtkWidget*));
+  }
+
+	for(k =0; k< number_keys+2;k++){
+    for(j=0;j<number_keys+2;j++){
+
+      entrada[k][j]= gtk_entry_new();
+      gtk_grid_attach (GTK_GRID (btree_solution_grid),entrada[k][j] , k, j, 1, 1);
+			gtk_widget_set_sensitive (entrada[k][j], FALSE);
+			if(k == 0 && j == 0) {
+				gtk_widget_set_name(entrada[k][j], "column_name_R");
+			}
+			if(k== 0 && j !=0){
+			snprintf(buff,25,"%d",j);
+			gtk_entry_set_text (entrada[k][j],buff);
+			gtk_widget_set_name(entrada[k][j], "column_name_R");
+			}
+			else if(k!= 0 && j ==0){
+			snprintf(buff,25,"%d",k-1);
+			gtk_entry_set_text (entrada[k][j],buff);
+			gtk_widget_set_name(entrada[k][j], "column_name_R");
+			}
+			else if(k !=0 && j!= 0){
+				if ( k > j || k == j){
+					snprintf(buff,25,"%d",r_table_mtx[j-1][k-1]);
+					gtk_entry_set_text (entrada[k][j],buff);
+				}
+				gtk_widget_set_name(entrada[k][j], "field_R");
+			}
+    }
+  }
+	g_object_unref(btree_solution_window_builder);
+
+	gtk_widget_show_all(btree_solution_table_window);
+}
+
+void create_solution_tables(){
+
+ 	create_table_A();
+	create_table_R();
+
+
+}
+
 void create_solution_matrix(){
 		//printf("%s\n", "HOLA");
 		int i, j = 0;
@@ -282,6 +423,7 @@ void solve_BTREE_problem(){
 	printSolution(matriz_solution);
 	printf("--------------R TABLE SOLUTION--------------\n");
 	printSolution_int(r_table_mtx);
+	create_solution_tables();
 }
 
 

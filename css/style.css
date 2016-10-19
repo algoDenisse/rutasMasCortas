@@ -84,6 +84,28 @@ background-image: -gtk-gradient (linear,
   font-weight: bold;
 }
 
+#column_name_A{
+  font: Sanz 12;
+  font-weight: bold;
+  color: white;
+  background-color: #eb7100;
+}
+#field_A{
+  background-color: #ffca99;
+  color: black;
+}
+
+#column_name_R{
+  font: Sanz 12;
+  font-weight: bold;
+  color: white;
+  background-color: #745ee4;
+}
+#field_R{
+  background-color: #b4a8f0;
+  color: black;
+}
+
 #title{
   font: Sanz 12;
   font-weight: bold;
@@ -111,6 +133,13 @@ background-image: -gtk-gradient (linear,
   font: Sanz 12;
   font-weight: bold;
 
+}
+
+#new_val_A{
+  background-color: #ffca99;
+  color: black;
+  font: Sanz 12;
+  font-weight: bold;
 }
 #changed_val{
   color: green;
