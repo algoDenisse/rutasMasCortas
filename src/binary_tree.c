@@ -4,9 +4,11 @@
 #include <stdlib.h>
 //Global variables
 GtkWidget *number_keys_entry, *warning_window;
+GtkBuilder      *file_saver_builder;
+GtkWidget       *file_saver_window;
 GtkFileChooser *file_chooser;
 char string_buffer[25];
-
+char file_name_buffer[25];
 int number_keys,charPos, winnerK= 0;
 bool f_manual = FALSE;
 
@@ -24,6 +26,21 @@ GtkWidget       *initial_BTREE_table_window;
 GtkWidget       *initial_BTREE_table;
 GtkWidget ***entrada;
 
+
+bool is_number(gchar* pvalue){
+
+  int length,i;
+
+  length = strlen (pvalue);
+   for (i=0;i<length; i++)
+       if (!isdigit(pvalue[i]))
+       {
+           return FALSE;
+       }
+   return TRUE;
+
+}
+
 void buffer_char(char c){
 	string_buffer[charPos++] = c;
 }
@@ -32,7 +49,67 @@ void clear_token_buffer(){
 	memset(string_buffer, 0, 25);
 	charPos = 0;
 }
+void clear_file_buffer(char pfile_value[5]){
+	memset(pfile_value, 0, 5);
 
+}
+void on_btn_save_filename_clicked(GtkWidget *widget, gpointer   data){
+  printf("voya a guaradr\n" );
+  strcpy(file_name_buffer, gtk_entry_get_text (data));
+  strcat(file_name_buffer, ".txt");
+  if (strcmp(gtk_entry_get_text (data), "") == 0){
+    create_warning_window("Debe ingresar un nombre valido.");
+  }
+  else{
+    printf("El nombre del archivo es: %s\n", file_name_buffer );
+    //Archivo en el que se graba información
+    FILE * output;
+    int j, i;
+    char file_value[20];
+    output= fopen( file_name_buffer, "w+");
+
+		printf(" HEY\n");
+
+		for(j=0;j<number_keys;j++){
+
+			fprintf(output, "%s|",key_as_string[j]);
+			snprintf(file_value,20,"%.4f",weights[j]);
+			fprintf(output, "%s",file_value);
+			clear_file_buffer(file_value);
+			fprintf(output, "\n");
+		}
+
+
+
+    fclose(output);
+    gtk_widget_destroy (file_saver_window);
+  }
+}
+
+void writeFile(){
+
+  GtkWidget *button;
+  GtkWidget *entry;
+
+
+  file_saver_builder = gtk_builder_new();
+  gtk_builder_add_from_file (file_saver_builder, "glade/file_saver_window.glade", NULL);
+
+  file_saver_window = GTK_WIDGET(gtk_builder_get_object(file_saver_builder, "file_saver_window"));
+  gtk_builder_connect_signals(file_saver_builder,NULL);
+
+  entry = GTK_WIDGET(gtk_builder_get_object(file_saver_builder, "file_name"));
+
+  button =  GTK_WIDGET(gtk_builder_get_object(file_saver_builder, "btn_save_filename"));
+  g_signal_connect (button, "clicked", G_CALLBACK (on_btn_save_filename_clicked), (gpointer) entry);
+
+
+  g_object_unref(file_saver_builder);
+
+  gtk_widget_show_all(file_saver_window);
+
+
+}
 int getObjectsQuantity( gchar *pFilename){
 
 	int row_numb=0;
@@ -391,32 +468,74 @@ void create_solution_matrix(){
 	int last_j = 2;
 	bool siga = TRUE;
 	while(siga){
-		printf("[%d][%d]\n", i, j );
-		matriz_solution[i][j] = find_min(matriz_solution, i, j);
-			i ++;
-			j ++;
-		if (j == number_keys+1){ //reinicializo
-			i = 0;
-			last_j ++;
-			j = last_j;
-		}
 		if( (i == 0)&&(j == number_keys)){
 			printf("[%d][%d]\n", i, j );
 			matriz_solution[i][j] = find_min(matriz_solution, i, j);
 				siga = FALSE;
 			}
+			else{
+				printf("[%d][%d]\n", i, j );
+				matriz_solution[i][j] = find_min(matriz_solution, i, j);
+					i ++;
+					j ++;
+				if (j == number_keys+1){ //reinicializo
+					i = 0;
+					last_j ++;
+					j = last_j;
+				}
+			}
 	}
 
 }
 
-void solve_BTREE_problem(){
+void solve_BTREE_problem(GtkWidget *widget, gpointer   data){
+	int fila, columna,value, i, x, w;
+  float ret;
 	GtkWidget  *entrada;
   entrada = gtk_entry_new();
   gchar* entrance;
   entrance = calloc(1, 500*sizeof(gchar));
 	if(f_manual){
 		//llenar las matrices con los datos de entrada
+		key_as_string = calloc(number_keys, 500*sizeof(char));
+		//alojamos la memoria para cada espacio del char
+		for (i = 0; i < number_keys; ++i) {
+			 key_as_string[i] = (char *)malloc(500);
+		}
+		weights = calloc(number_keys, 500*sizeof(float));
+
+
+		//alojamos la memoria para cada espacio
+		x, w = 0;
+		for(columna = 0; columna <2; columna++){
+	    for(fila = 1; fila <= number_keys; fila++){
+	      entrada = gtk_grid_get_child_at (data, columna, fila);
+					if(columna == 0){
+						g_stpcpy(entrance,gtk_entry_get_text(entrada));
+						g_stpcpy(key_as_string[x],entrance);
+						x++;
+
+					}
+					else{
+
+							g_stpcpy(entrance,gtk_entry_get_text(entrada));
+							ret = strtof(entrance,NULL);
+				      weights[w]=ret;
+				      w++;
+					}
+			}
+		}
+		writeFile();
 	}
+	int k;
+	for(k=0;k<number_keys;k++){
+	 printf("Key:%s\n",key_as_string[k]);
+	}
+
+	for(w=0;w<number_keys;w++){
+	printf("Peso:%lf\n",weights[w]);
+	}
+
 	sort_keys();
 	getProbabilities();
 	create_solution_matrix();
@@ -564,20 +683,6 @@ void filechooser_btree_file_set_cb(){
 
   create_entry_window();
 	update_initial_table(number_keys);
-}
-
-bool is_number(gchar* pvalue){
-
-  int length,i;
-
-  length = strlen (pvalue);
-   for (i=0;i<length; i++)
-       if (!isdigit(pvalue[i]))
-       {
-           return FALSE;
-       }
-   return TRUE;
-
 }
 
 void btn_warning_clicked_cb(){
