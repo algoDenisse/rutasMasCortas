@@ -20,6 +20,7 @@ float *weights;
 double **matriz_solution;
 int **r_table_mtx;
 float *probabilities;
+int dataType;
 
 GtkBuilder      *initial_BTREE_table_builder;
 GtkWidget       *initial_BTREE_table_window;
@@ -39,6 +40,16 @@ bool is_number(gchar* pvalue){
        }
    return TRUE;
 
+}
+
+bool is_double(gchar* pvalue){
+  char *ep = NULL;
+    if(is_number(pvalue)) return false;
+     double f = strtod (pvalue, &ep);
+     if (!ep  ||  *ep)
+         return false;  // has non-floating digits after number, if any
+
+     return true;
 }
 
 void buffer_char(char c){
@@ -227,12 +238,12 @@ void sort_keys()
 }
 //the function gets the probabilities and stores them in the array
 void getProbabilities(){
- float sum_weights= 0;
+ float sum_weights, sum_probabilities= 0;
  int ind;
  for(ind = 0;ind < number_keys ; ind++){
   sum_weights+=weights[ind];
  }
- printf("The sum of the weights is:%lf\n",sum_weights);
+ //printf("The sum of the weights is:%lf\n",sum_weights);
 
  probabilities = calloc(number_keys, 500*sizeof(float));
 
@@ -240,6 +251,12 @@ void getProbabilities(){
   probabilities[ind] = weights[ind]/sum_weights;
 
  }
+
+ for(ind = 0;ind < number_keys ; ind++){
+  sum_probabilities+= probabilities[ind];
+ }
+
+printf("The sum of the probabilities is:%lf\n",sum_probabilities);
 
 }
 
@@ -496,6 +513,7 @@ void create_solution_matrix(){
 
 }
 
+
 void solve_BTREE_problem(GtkWidget *widget, gpointer   data){
 	int fila, columna,value, i, x, w;
   float ret;
@@ -503,6 +521,7 @@ void solve_BTREE_problem(GtkWidget *widget, gpointer   data){
   entrada = gtk_entry_new();
   gchar* entrance;
   entrance = calloc(1, 500*sizeof(gchar));
+
 	if(f_manual){
 		//llenar las matrices con los datos de entrada
 		key_as_string = calloc(number_keys, 500*sizeof(char));
@@ -513,39 +532,68 @@ void solve_BTREE_problem(GtkWidget *widget, gpointer   data){
 		weights = calloc(number_keys, 500*sizeof(float));
 
 
-		//alojamos la memoria para cada espacio
-		x, w = 0;
-		for(columna = 0; columna <2; columna++){
+
+    for(columna = 1; columna <2; columna++){
 	    for(fila = 1; fila <= number_keys; fila++){
 	      entrada = gtk_grid_get_child_at (data, columna, fila);
-					if(columna == 0){
-						g_stpcpy(entrance,gtk_entry_get_text(entrada));
-						g_stpcpy(key_as_string[x],entrance);
-						x++;
+					if(columna == 1 && fila == 1){
+            if(is_number(gtk_entry_get_text(entrada)) || is_double(gtk_entry_get_text(entrada))){
+              if(is_number(gtk_entry_get_text(entrada))) dataType = 1;
+              else {
+                dataType = 0;
+              }
+            }
+            else{
+              create_warning_window("Los pesos deben ser enteros o punto flotantes.");
+            }
+          }
+          else{
+            if(dataType == 1){
+              if(!is_number(gtk_entry_get_text(entrada))) create_warning_window("Los pesos deben ser de un tipo de dato uniforme.");
+            }
+            else if (dataType == 0){
+              if(!is_double(gtk_entry_get_text(entrada))) create_warning_window("Los pesos deben ser de un tipo de dato uniforme.");
 
-					}
-					else{
-
-							g_stpcpy(entrance,gtk_entry_get_text(entrada));
-							ret = strtof(entrance,NULL);
-				      weights[w]=ret;
-				      w++;
-					}
+            }
+          }
 			}
 		}
-    int k;
-    for(k=0;k<number_keys;k++){
-     printf("Key:%s\n",key_as_string[k]);
+
+
+      //alojamos la memoria para cada espacio
+      x, w = 0;
+
+      for(columna = 0; columna <2; columna++){
+        for(fila = 1; fila <= number_keys; fila++){
+          entrada = gtk_grid_get_child_at (data, columna, fila);
+            if(columna == 0){
+              g_stpcpy(entrance,gtk_entry_get_text(entrada));
+              g_stpcpy(key_as_string[x],entrance);
+              x++;
+
+            }
+            else{
+                g_stpcpy(entrance,gtk_entry_get_text(entrada));
+                ret = strtof(entrance,NULL);
+                weights[w]=ret;
+                w++;
+            }
+        }
+      }
+      int k;
+      for(k=0;k<number_keys;k++){
+       printf("Key:%s\n",key_as_string[k]);
+      }
+
+      for(w=0;w<number_keys;w++){
+      printf("Peso:%lf\n",weights[w]);
+      }
+      writeFile();
+      f_manual = FALSE;
     }
 
-    for(w=0;w<number_keys;w++){
-    printf("Peso:%lf\n",weights[w]);
-    }
-		writeFile();
-    f_manual = FALSE;
-	}
+	//}
  else{
-
 
   	sort_keys();
   	getProbabilities();
@@ -708,6 +756,7 @@ void btn_warning_clicked_cb(){
 }
 
 void create_warning_window(gchar* pMessage){
+  dataType = 1;
   GtkBuilder      *warning_builder;
   GtkWidget       *message_label;
   warning_builder = gtk_builder_new();
@@ -735,7 +784,7 @@ void on_ok_key_button_clicked(){
     number_keys=atoi(gtk_entry_get_text (number_keys_entry));
     printf("El valor digitado es:%d\n",number_keys);
     f_manual = TRUE;
-		create_entry_window();
+	create_entry_window();
   }
 
 
