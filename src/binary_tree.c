@@ -564,15 +564,20 @@ void create_entry_window(){
 	int k,j;
 	GtkWidget       *button;
 	GtkWidget       *button_box;
+  GtkWidget *btree_entry_scrolledwindow;
+
 	initial_BTREE_table_builder= gtk_builder_new();
 	gtk_builder_add_from_file (initial_BTREE_table_builder, "glade/initial_entry_win_BTREE.glade", NULL);
 
 	initial_BTREE_table_window = GTK_WIDGET(gtk_builder_get_object(initial_BTREE_table_builder, "btree_entry_window"));
 	gtk_builder_connect_signals(initial_BTREE_table_builder, NULL);
 
+  btree_entry_scrolledwindow = GTK_WIDGET(gtk_builder_get_object(initial_BTREE_table_builder, "btree_entry_scrolledwindow"));
+	gtk_builder_connect_signals(initial_BTREE_table_builder, NULL);
+
 	initial_BTREE_table= gtk_grid_new();
 	gtk_grid_set_row_spacing (GTK_GRID (initial_BTREE_table), 2);
-	gtk_container_add (GTK_CONTAINER (initial_BTREE_table_window), initial_BTREE_table);
+	gtk_container_add (GTK_CONTAINER (btree_entry_scrolledwindow), initial_BTREE_table);
 
 	//dynamic grid
 	entrada=calloc(number_keys+1,sizeof(GtkWidget**));
