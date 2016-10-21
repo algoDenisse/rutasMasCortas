@@ -83,6 +83,14 @@ void on_btn_save_filename_clicked(GtkWidget *widget, gpointer   data){
 
     fclose(output);
     gtk_widget_destroy (file_saver_window);
+    sort_keys();
+  	getProbabilities();
+  	create_solution_matrix();
+  	printSolution(matriz_solution);
+  	printf("--------------R TABLE SOLUTION--------------\n");
+  	printSolution_int(r_table_mtx);
+  	create_solution_tables();
+
   }
 }
 
@@ -525,24 +533,29 @@ void solve_BTREE_problem(GtkWidget *widget, gpointer   data){
 					}
 			}
 		}
+    int k;
+    for(k=0;k<number_keys;k++){
+     printf("Key:%s\n",key_as_string[k]);
+    }
+
+    for(w=0;w<number_keys;w++){
+    printf("Peso:%lf\n",weights[w]);
+    }
 		writeFile();
+    f_manual = FALSE;
 	}
-	int k;
-	for(k=0;k<number_keys;k++){
-	 printf("Key:%s\n",key_as_string[k]);
-	}
+ else{
 
-	for(w=0;w<number_keys;w++){
-	printf("Peso:%lf\n",weights[w]);
-	}
 
-	sort_keys();
-	getProbabilities();
-	create_solution_matrix();
-	printSolution(matriz_solution);
-	printf("--------------R TABLE SOLUTION--------------\n");
-	printSolution_int(r_table_mtx);
-	create_solution_tables();
+  	sort_keys();
+  	getProbabilities();
+  	create_solution_matrix();
+  	printSolution(matriz_solution);
+  	printf("--------------R TABLE SOLUTION--------------\n");
+  	printSolution_int(r_table_mtx);
+  	create_solution_tables();
+ }
+
 }
 
 
