@@ -4,7 +4,7 @@
 GtkWidget *number_matrix_entry, *warning_window;
 int matrix_number,charPos;
 GtkFileChooser *file_chooser;
-bool f_manual = FALSE;
+bool f_manual = TRUE;
 GtkBuilder      *file_saver_builder;
 GtkWidget       *file_saver_window;
 char file_name_buffer[25];
@@ -19,8 +19,23 @@ char **matrix_names;
 char **column_names;
 int *global_n_values;
 int *global_m_values;
+int **matriz_solution;
+int **p_solution_matrix;
 //Matriz intermedia de datos leidos del archivo
 int **matriz_datos;
+
+void printSolution(int **dist)
+{
+    int i,j;
+    for (i = 0; i <= matrix_number; i++)
+    {
+        for ( j = 0; j <= matrix_number; j++)
+        {
+          printf ("%7d", dist[i][j]);
+        }
+        printf("\n");
+    }
+}
 
 
 bool is_number(gchar* pvalue){
@@ -163,18 +178,86 @@ void update_initial_table(int pMatrix_number){
 				gtk_entry_set_text (pt_entrada, matrix_names[i-1]);
 			}
 			else{
-        //snprintf(pt_cell_value,5,"%d",matriz_datos[i-1]);
-
         gtk_entry_set_text (pt_entrada, matriz_datos[w]);
         w++;
-				//snprintf(pt_cell_value,10,"%.4f",weights[i-1]);
-				//printf("%s\n",pt_cell_value );
-				//gtk_entry_set_text (pt_entrada, pt_cell_value );
-
 			}
 
     }// end j FOR
   }//end i FOR
+
+}
+void get_solution_matrices(){
+  int i, j, k, L, q;
+  int *p = (int) calloc(matrix_number+1, sizeof(int));
+  p[0] =  global_n_values[0];
+  //--------------------------------------
+  for(i = 1; i <= matrix_number; i ++){
+    p[i] = global_m_values[i-1];
+  }
+  for(i = 0; i < matrix_number; i ++){
+    printf("[%d]",p[i]);
+  }
+  printf("[%d]\n",p[matrix_number]);
+  //--------------------------------------
+
+  matriz_solution = calloc(matrix_number+1, 1+sizeof(double*));
+  p_solution_matrix = calloc(matrix_number+1, 1+sizeof(int*));
+  for (i = 0; i < matrix_number+1; ++i) {
+     matriz_solution[i] = calloc(matrix_number+1,sizeof(double));
+     p_solution_matrix[i] = calloc(matrix_number+1,sizeof(int));
+  }
+
+  // cost is zero when multiplying one matrix.
+   for(i = 0; i <=matrix_number ; i ++ ){
+       for(j = 0; j <= matrix_number; j ++){
+           matriz_solution[i][j] =-1;
+           p_solution_matrix[i][j] =-1;
+       }
+   }
+   for (i=1; i<=matrix_number; i++){
+     matriz_solution[i][i] = 0;
+     p_solution_matrix[i][i] = i;
+   }
+
+    // L is chain length.
+    for (L=2; L<matrix_number+2; L++)
+    {
+        for (i=1; i<matrix_number-L+2; i++)
+        {
+            j = i+L-1;
+            matriz_solution[i][j] = 9999;
+            for (k=i; k<=j-1; k++)
+            {
+                // q = cost/scalar multiplications
+                q = matriz_solution[i][k] + matriz_solution[k+1][j] + p[i-1]*p[k]*p[j];
+                if (q < matriz_solution[i][j]){
+                    matriz_solution[i][j] = q;
+                    p_solution_matrix[i][j] = k;
+                }
+            }
+        }
+    }
+
+
+
+   printf("-------------------------------Matrix M--------------------------\n");
+   printSolution(matriz_solution);
+   printf("-------------------------------Matrix P--------------------------\n");
+   printSolution(p_solution_matrix);
+
+}
+
+void printOptimalParenthesizations(int **s , int i, int j) {
+
+        if (i == j) {
+            printf("A_%d ", i);
+        }
+        else{
+            printf("(");
+            printOptimalParenthesizations(s, i, s[i][j]);
+            printOptimalParenthesizations(s, s[i][j] + 1, j);
+            printf(")");
+        }
 
 }
 
@@ -224,9 +307,13 @@ void solve_MATRIX_problem(GtkWidget *widget, gpointer   data){
         }
     }
   }
-  writeFile();
+  if(f_manual)  writeFile();
 
-
+  get_solution_matrices();
+  //create_solution_tables();
+  printf("\n");
+  printOptimalParenthesizations(p_solution_matrix,1,matrix_number);
+  printf("\n");
 }
 
 //Manual entry of weights and keys
@@ -385,6 +472,7 @@ void filechooser_matrix_file_set_cb(){
   //for(i=0;i<matrix_number*2;i++){
     //printf("Elemento:%s\n",matriz_datos[i] );
   //}
+  f_manual = FALSE;
   create_entry_window();
 	update_initial_table(matrix_number);
 }
