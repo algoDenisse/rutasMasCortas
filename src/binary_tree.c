@@ -12,6 +12,7 @@ char file_name_buffer[25];
 int number_keys,charPos, winnerK= 0;
 bool f_manual = FALSE;
 
+
 //For keys we will need to arrays / keys can be strings or number_keys
 char **key_as_string;
 int  **key_as_int;

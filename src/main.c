@@ -84,7 +84,7 @@ void btn_algoritmo5_clicked_cb(){
     system("./series_deportivas &");
 }
 void btn_algoritmo6_clicked_cb(){
-    system("./pending_program &");
+    system("./matrix &");
 }
 void btn_algoritmo7_clicked_cb(){
     on_window_main_destroy();

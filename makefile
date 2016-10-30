@@ -6,6 +6,7 @@ KNAPSACK=knapsack
 EQREPLACE=equipment_replace
 SDEPORTIVAS=series_deportivas
 BINARYTREE=binary_tree
+MATRIX=matrix
 
 # compiler
 CC=gcc
@@ -33,8 +34,9 @@ KNOBJ=knapsack.o
 EROBJ=equipment_replace.o
 SDOBJ=series_deportivas.o
 BTOBJ=binary_tree.o
+MOBJ=matrix.o
 
-all: $(OBJS) $(POBJ) $(FOBJ) $(KNOBJ) $(EROBJ) $(SDOBJ) $(BTOBJ)
+all: $(OBJS) $(POBJ) $(FOBJ) $(KNOBJ) $(EROBJ) $(SDOBJ) $(BTOBJ) $(MOBJ)
 	$(LD) -o $(TARGET) $(OBJS) $(LDFLAGS)
 	$(LD) -o $(PENDING) $(POBJ) $(LDFLAGS)
 	$(LD) -o $(FLOYD) $(FOBJ) $(LDFLAGS)
@@ -42,7 +44,7 @@ all: $(OBJS) $(POBJ) $(FOBJ) $(KNOBJ) $(EROBJ) $(SDOBJ) $(BTOBJ)
 	$(LD) -o $(EQREPLACE) $(EROBJ) $(LDFLAGS)
 	$(LD) -o $(SDEPORTIVAS) $(SDOBJ) $(LDFLAGS)
 	$(LD) -o $(BINARYTREE) $(BTOBJ) $(LDFLAGS)
-
+	$(LD) -o $(MATRIX) $(MOBJ) $(LDFLAGS)
 
 
 main.o: src/main.c
@@ -72,6 +74,10 @@ series_deportivas.o: src/series_deportivas.c
 binary_tree.o: src/binary_tree.c
 
 	$(CC) -c $(CCFLAGS) src/binary_tree.c $(GTKLIB) -o binary_tree.o -w
+
+matrix.o: src/matrix.c
+
+	$(CC) -c $(CCFLAGS) src/matrix.c $(GTKLIB) -o matrix.o -w
 
 
 
