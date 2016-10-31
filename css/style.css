@@ -78,6 +78,12 @@ background-image: -gtk-gradient (linear,
   font: Sanz 11;
 }
 
+#lbl_mensaje2{
+  color: white;
+  font: Sanz 13;
+  font-weight: bold;
+}
+
 
 #column_name{
   font: Sanz 12;

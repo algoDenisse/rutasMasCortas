@@ -23,6 +23,9 @@ int **matriz_solution;
 int **p_solution_matrix;
 //Matriz intermedia de datos leidos del archivo
 int **matriz_datos;
+char solution[1024];
+char intermedio[506];
+char costo[506];
 
 void printSolution(int **dist)
 {
@@ -248,18 +251,196 @@ void get_solution_matrices(){
 }
 
 void printOptimalParenthesizations(int **s , int i, int j) {
-
         if (i == j) {
-            printf("A_%d ", i);
+          snprintf(intermedio, 506, "A_%d ", i);
+          strcat(solution,intermedio);
+          printf("A_%d ", i);
         }
         else{
+            snprintf(intermedio, 506, "(");
+            strcat(solution,intermedio);
             printf("(");
             printOptimalParenthesizations(s, i, s[i][j]);
             printOptimalParenthesizations(s, s[i][j] + 1, j);
+            snprintf(intermedio, 506, ")");
+            strcat(solution,intermedio);
             printf(")");
         }
 
 }
+
+void displayValues(){
+  GtkBuilder      *ER_solution_builder;
+
+  GtkWidget       *ER_solution_label1;
+  GtkWidget       *ER_solution_label2;
+  GtkWidget       *ER_solution_label3;
+  GtkWidget       *ER_solution_label4;
+
+  GtkWidget       *ER_solution_window;
+
+
+  ER_solution_builder = gtk_builder_new();
+  gtk_builder_add_from_file (ER_solution_builder, "glade/ER_solution_window.glade", NULL);
+
+  ER_solution_window = GTK_WIDGET(gtk_builder_get_object(ER_solution_builder, "ER_solution_window"));
+  gtk_builder_connect_signals(ER_solution_builder,NULL);
+
+  gtk_widget_set_size_request(ER_solution_window, 400, 200);
+
+  ER_solution_label1 = GTK_WIDGET(gtk_builder_get_object(ER_solution_builder, "label1"));
+  ER_solution_label2 = GTK_WIDGET(gtk_builder_get_object(ER_solution_builder, "label2"));
+  ER_solution_label3 = GTK_WIDGET(gtk_builder_get_object(ER_solution_builder, "label3"));
+  ER_solution_label4 = GTK_WIDGET(gtk_builder_get_object(ER_solution_builder, "label4"));
+
+  gtk_label_set_text (ER_solution_label1,"Orden óptimo de multiplicación de matrices:");
+  gtk_label_set_text (ER_solution_label2,solution);
+  gtk_label_set_text (ER_solution_label3,"Con un costo de:");
+  gtk_label_set_text (ER_solution_label4,costo);
+
+  g_object_unref(ER_solution_builder);
+
+  gtk_widget_show_all(ER_solution_window);
+
+}
+
+void 	create_table_M(){
+	GtkBuilder      *matrix_solution_window_builder;
+	GtkWidget       *matrix_solution_table_window;
+	GtkWidget       *matrix_solution_table_scrolledwindow;
+	GtkWidget				*matrix_solution_grid;
+
+	char buff[25];
+	matrix_solution_window_builder =  gtk_builder_new();
+	gtk_builder_add_from_file (matrix_solution_window_builder, "glade/matrix_solution_window.glade", NULL);
+
+	matrix_solution_table_window = GTK_WIDGET(gtk_builder_get_object(matrix_solution_window_builder, "matrix_solution_window"));
+  gtk_builder_connect_signals(matrix_solution_window_builder, NULL);
+	gtk_window_set_title (GTK_WINDOW (matrix_solution_table_window), "Tabla M");
+
+	matrix_solution_table_scrolledwindow = GTK_WIDGET(gtk_builder_get_object(matrix_solution_window_builder, "matrix_solution_scrolledwindow"));
+	gtk_builder_connect_signals(matrix_solution_window_builder, NULL);
+
+	matrix_solution_grid = gtk_grid_new();
+  gtk_grid_set_row_spacing (GTK_GRID (matrix_solution_grid), 2);
+  gtk_container_add (GTK_CONTAINER (matrix_solution_table_scrolledwindow), matrix_solution_grid);
+
+	GtkWidget ***entrada;
+	int j,k,i;
+  entrada=calloc(matrix_number+2,sizeof(GtkWidget**));
+  for(j = 0; j < matrix_number+2; j++){
+    entrada[j]=calloc(matrix_number+2,sizeof(GtkWidget*));
+  }
+
+	for(k =0; k< matrix_number+1;k++){
+    for(j=0;j<matrix_number+1;j++){
+
+      entrada[k][j]= gtk_entry_new();
+      gtk_grid_attach (GTK_GRID (matrix_solution_grid),entrada[k][j] , k, j, 1, 1);
+			gtk_widget_set_sensitive (entrada[k][j], FALSE);
+			if(k == 0 && j == 0) {
+				gtk_widget_set_name(entrada[k][j], "column_name_A");
+			}
+			if(k== 0 && j !=0){
+			snprintf(buff,25,"%d",j);
+			gtk_entry_set_text (entrada[k][j],buff);
+			gtk_widget_set_name(entrada[k][j], "column_name_A");
+			}
+			else if(k!= 0 && j ==0){
+			snprintf(buff,25,"%d",k);
+			gtk_entry_set_text (entrada[k][j],buff);
+			gtk_widget_set_name(entrada[k][j], "column_name_A");
+			}
+			else if(k !=0 && j!= 0){
+				gtk_widget_set_name(entrada[k][j], "field_A");
+				if ( k > j || k == j){
+
+					if((j-1== 0)&& (k == matrix_number)){
+						gtk_widget_set_name(entrada[k][j],"new_val_A");
+            snprintf(costo,506,"%d",matriz_solution[j][k]);
+					}
+					snprintf(buff,25,"%d",matriz_solution[j][k]);
+					gtk_entry_set_text (entrada[k][j],buff);
+
+				}
+
+			}
+
+    }
+  }
+
+
+	g_object_unref(matrix_solution_window_builder);
+
+	gtk_widget_show_all(matrix_solution_table_window);
+}
+
+void 	create_table_P(){
+	GtkBuilder      *matrix_solution_window_builder;
+	GtkWidget       *matrix_solution_table_window;
+	GtkWidget       *matrix_solution_table_scrolledwindow;
+	GtkWidget				*matrix_solution_grid;
+
+	char buff[25];
+	matrix_solution_window_builder =  gtk_builder_new();
+	gtk_builder_add_from_file (matrix_solution_window_builder, "glade/matrix_Psolution_window.glade", NULL);
+
+	matrix_solution_table_window = GTK_WIDGET(gtk_builder_get_object(matrix_solution_window_builder, "matrix_Psolution_window"));
+  gtk_builder_connect_signals(matrix_solution_window_builder, NULL);
+	gtk_window_set_title (GTK_WINDOW (matrix_solution_table_window), "Tabla P");
+
+	matrix_solution_table_scrolledwindow = GTK_WIDGET(gtk_builder_get_object(matrix_solution_window_builder, "matrix_Psolution_scrolledwindow"));
+	gtk_builder_connect_signals(matrix_solution_window_builder, NULL);
+
+	matrix_solution_grid = gtk_grid_new();
+  gtk_grid_set_row_spacing (GTK_GRID (matrix_solution_grid), 2);
+  gtk_container_add (GTK_CONTAINER (matrix_solution_table_scrolledwindow), matrix_solution_grid);
+
+	GtkWidget ***entrada;
+	int j,k,i;
+  entrada=calloc(matrix_number+2,sizeof(GtkWidget**));
+  for(j = 0; j < matrix_number+2; j++){
+    entrada[j]=calloc(matrix_number+2,sizeof(GtkWidget*));
+  }
+
+	for(k =0; k< matrix_number+1;k++){
+    for(j=0;j<matrix_number+1;j++){
+
+      entrada[k][j]= gtk_entry_new();
+      gtk_grid_attach (GTK_GRID (matrix_solution_grid),entrada[k][j] , k, j, 1, 1);
+			gtk_widget_set_sensitive (entrada[k][j], FALSE);
+			if(k == 0 && j == 0) {
+				gtk_widget_set_name(entrada[k][j], "column_name_R");
+			}
+			if(k== 0 && j !=0){
+			snprintf(buff,25,"%d",j);
+			gtk_entry_set_text (entrada[k][j],buff);
+			gtk_widget_set_name(entrada[k][j], "column_name_R");
+			}
+			else if(k!= 0 && j ==0){
+			snprintf(buff,25,"%d",k);
+			gtk_entry_set_text (entrada[k][j],buff);
+			gtk_widget_set_name(entrada[k][j], "column_name_R");
+			}
+			else if(k !=0 && j!= 0){
+				gtk_widget_set_name(entrada[k][j], "field_R");
+				if ( k > j || k == j){
+					snprintf(buff,25,"%d",p_solution_matrix[j][k]);
+					gtk_entry_set_text (entrada[k][j],buff);
+
+				}
+
+			}
+
+    }
+  }
+
+
+	g_object_unref(matrix_solution_window_builder);
+
+	gtk_widget_show_all(matrix_solution_table_window);
+}
+
 
 void solve_MATRIX_problem(GtkWidget *widget, gpointer   data){
   printf("%s\n","Click en Procesar" );
@@ -314,6 +495,9 @@ void solve_MATRIX_problem(GtkWidget *widget, gpointer   data){
   printf("\n");
   printOptimalParenthesizations(p_solution_matrix,1,matrix_number);
   printf("\n");
+  create_table_M();
+  create_table_P();
+  displayValues();
 }
 
 //Manual entry of weights and keys
