@@ -468,23 +468,46 @@ void solve_MATRIX_problem(GtkWidget *widget, gpointer   data){
     for(fila = 1; fila <= matrix_number; fila++){
       entrada = gtk_grid_get_child_at (data, columna, fila);
         if(columna == 0){
-          g_stpcpy(entrance,gtk_entry_get_text(entrada));
-          //printf("k = %d\n",k );
-          strcpy(column_names[k],entrance);
-          k++;
-
+          if(strcmp(gtk_entry_get_text (entrada), "") ==0 ){
+            create_warning_window("Las dimensiones no pueden ser vacías");
+          }
+          else{
+            g_stpcpy(entrance,gtk_entry_get_text(entrada));
+            //printf("k = %d\n",k );
+            strcpy(column_names[k],entrance);
+            k++;
+          }
         }
         else if(columna == 1){
-          g_stpcpy(entrance,gtk_entry_get_text(entrada));
-          global_n_values[d]=atoi(entrance);
-          d++;
+          if(strcmp(gtk_entry_get_text (entrada), "") ==0 ){
+            create_warning_window("Las dimensiones no pueden ser vacías");
+          }
+          else if(!is_number(gtk_entry_get_text (entrada)) ){
+
+            create_warning_window("Las dimensiones deben ser enteros");
+
+          }
+          else{
+              g_stpcpy(entrance,gtk_entry_get_text(entrada));
+              global_n_values[d]=atoi(entrance);
+              d++;
+          }
+
         }
         else{
-          g_stpcpy(entrance,gtk_entry_get_text(entrada));
-          global_m_values[w]=atoi(entrance);
-          w++;
+          if(strcmp(gtk_entry_get_text (entrada), "") ==0 ){
+            create_warning_window("Las dimensiones no pueden ser vacías");
+          }
+          else if(!is_number(gtk_entry_get_text (entrada)) ){
 
+            create_warning_window("Las dimensiones deben ser enteros");
 
+          }
+          else{
+            g_stpcpy(entrance,gtk_entry_get_text(entrada));
+            global_m_values[w]=atoi(entrance);
+            w++;
+          }
         }
     }
   }
