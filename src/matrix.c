@@ -59,6 +59,12 @@ void clear_file_buffer(char pfile_value[5]){
 	memset(pfile_value, 0, 5);
 
 }
+void clear_file_bufferS(){
+	memset(intermedio, 0, 506);
+  memset(solution, 0, 1024);
+  memset(costo, 0, 506);
+
+}
 
 void on_btn_save_filename_clicked(GtkWidget *widget, gpointer   data){
   printf("voya a guaradr\n" );
@@ -92,6 +98,16 @@ void on_btn_save_filename_clicked(GtkWidget *widget, gpointer   data){
 
     fclose(output);
     gtk_widget_destroy (file_saver_window);
+
+    get_solution_matrices();
+    //create_solution_tables();
+    printf("\n");
+    clear_file_bufferS();
+    printOptimalParenthesizations(p_solution_matrix,1,matrix_number);
+    printf("\n");
+    create_table_M();
+    create_table_P();
+    displayValues();
 
   }
 }
@@ -203,10 +219,10 @@ void get_solution_matrices(){
   printf("[%d]\n",p[matrix_number]);
   //--------------------------------------
 
-  matriz_solution = calloc(matrix_number+1, 1+sizeof(double*));
+  matriz_solution = calloc(matrix_number+1, 1+sizeof(int*));
   p_solution_matrix = calloc(matrix_number+1, 1+sizeof(int*));
   for (i = 0; i < matrix_number+1; ++i) {
-     matriz_solution[i] = calloc(matrix_number+1,sizeof(double));
+     matriz_solution[i] = calloc(matrix_number+1,sizeof(int));
      p_solution_matrix[i] = calloc(matrix_number+1,sizeof(int));
   }
 
@@ -228,10 +244,9 @@ void get_solution_matrices(){
         for (i=1; i<matrix_number-L+2; i++)
         {
             j = i+L-1;
-            matriz_solution[i][j] = 9999;
+            matriz_solution[i][j] = INT_MAX;;
             for (k=i; k<=j-1; k++)
             {
-                // q = cost/scalar multiplications
                 q = matriz_solution[i][k] + matriz_solution[k+1][j] + p[i-1]*p[k]*p[j];
                 if (q < matriz_solution[i][j]){
                     matriz_solution[i][j] = q;
@@ -244,13 +259,14 @@ void get_solution_matrices(){
 
 
    printf("-------------------------------Matrix M--------------------------\n");
-   printSolution(matriz_solution);
+   //printSolution(matriz_solution);
    printf("-------------------------------Matrix P--------------------------\n");
-   printSolution(p_solution_matrix);
+   //printSolution(p_solution_matrix);
 
 }
 
 void printOptimalParenthesizations(int **s , int i, int j) {
+
         if (i == j) {
           snprintf(intermedio, 506, "A_%d ", i);
           strcat(solution,intermedio);
@@ -467,6 +483,13 @@ void solve_MATRIX_problem(GtkWidget *widget, gpointer   data){
   for(columna = 0; columna <3; columna++){
     for(fila = 1; fila <= matrix_number; fila++){
       entrada = gtk_grid_get_child_at (data, columna, fila);
+      if(fila < 1 && columna < 0){
+          if (columna == 1){
+            if(gtk_entry_get_text (entrada)!= gtk_entry_get_text (gtk_grid_get_child_at (data, columna-1, fila-1))){
+              create_warning_window("Las dimensiones deben estar ordenadas");
+            }
+          }
+      }
         if(columna == 0){
           if(strcmp(gtk_entry_get_text (entrada), "") ==0 ){
             create_warning_window("Las dimensiones no pueden ser vacías");
@@ -479,7 +502,12 @@ void solve_MATRIX_problem(GtkWidget *widget, gpointer   data){
           }
         }
         else if(columna == 1){
-          if(strcmp(gtk_entry_get_text (entrada), "") ==0 ){
+          if((fila > 1) && (strcmp(gtk_entry_get_text (entrada), gtk_entry_get_text (gtk_grid_get_child_at (data, columna+1, fila-1)))==1)){
+              printf("primer dato = %s  %d, %d\n", gtk_entry_get_text (entrada), columna, fila);
+              printf("segundo dato = %s %d, %d\n", gtk_entry_get_text (gtk_grid_get_child_at (data, columna+1, fila-1)), columna+1, fila-1);
+              create_warning_window("Las dimensiones deben estar ordenadas");
+          }
+          else if(strcmp(gtk_entry_get_text (entrada), "") ==0 ){
             create_warning_window("Las dimensiones no pueden ser vacías");
           }
           else if(!is_number(gtk_entry_get_text (entrada)) ){
@@ -511,16 +539,23 @@ void solve_MATRIX_problem(GtkWidget *widget, gpointer   data){
         }
     }
   }
-  if(f_manual)  writeFile();
 
-  get_solution_matrices();
-  //create_solution_tables();
-  printf("\n");
-  printOptimalParenthesizations(p_solution_matrix,1,matrix_number);
-  printf("\n");
-  create_table_M();
-  create_table_P();
-  displayValues();
+  if(f_manual)  {
+    printf("f_manual = TRUE\n");
+    writeFile();
+  }
+  else{
+    printf("f_manual = FALSE\n");
+    get_solution_matrices();
+    //create_solution_tables();
+    printf("\n");
+    clear_file_bufferS();
+    printOptimalParenthesizations(p_solution_matrix,1,matrix_number);
+    printf("\n");
+    create_table_M();
+    create_table_P();
+    displayValues();
+  }
 }
 
 //Manual entry of weights and keys

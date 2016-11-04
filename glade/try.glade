@@ -116,10 +116,7 @@ secuencia de juegos, considerando la ventaja de localía para cada partido. </pr
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes"> Operación de composición efectuada entre dos
- matrices, o bien la multiplicación entre una
- matriz y un escalar según unas determinadas
- reglas.</property>
+                <property name="tooltip_text" translatable="yes">Dada una secuencia de matrices, encuentra el orden óptimo en el cual se multipliquen con un costo mínimo.</property>
                 <signal name="clicked" handler="btn_algoritmo6_clicked_cb" swapped="no"/>
               </object>
               <packing>
